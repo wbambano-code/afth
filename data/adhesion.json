@@ -1,0 +1,9 @@
+{
+  "title": "Adhésion",
+  "tarifs": [
+    { "label": "Adhésion (établissement, société)", "price": "100 €" }
+  ],
+  "payment_info_html": "<p>Vous pouvez également imprimer ce formulaire et l'envoyer à l'adresse ci-dessous.</p>\n<p><strong>Pour entériner votre adhésion</strong>, pensez à envoyer le règlement de votre adhésion à :</p>\n<p><strong>Julien LIRONCOURT</strong> — Trésorier AFTh<br>Stas Doyer Hydrothérapie — 3 Rue de Lomagne, 31600 Muret</p>",
+  "cta_text": "Demander l'adhésion →",
+  "cta_href": "/contact"
+}

@@ -18,7 +18,7 @@
   <div class="nav-inner">
     <a href="/" class="nav-brand">
       <img class="nav-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
-      <div><span class="nav-name">AFTh</span><span class="nav-sub">Techniques Hydrothermales</span></div>
+      <div><span class="nav-name">Association Française</span><span class="nav-sub">des Techniques Hydrothermales</span></div>
     </a>
     <nav>
       <ul class="nav-menu" id="nav-menu">
@@ -30,7 +30,6 @@
         <li><a href="/articles">Articles</a></li>
         <li><a href="/contact">Contact</a></li>
         <li><a href="/membres/login">🔑 Membre</a></li>
-        <li><a href="#" class="ai-link" id="nav-ai-btn">🤖 IA</a></li>
       </ul>
     </nav>
     <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
@@ -187,12 +186,7 @@
         </ul>
       </div>
       <div class="adhesion-tarifs">
-        <h3 style="font-family:var(--font-h);color:#fff;margin-bottom:.9rem;font-size:1.1rem;">Tarifs indicatifs</h3>
-        <div class="tarif-item"><span>Membre actif</span><span class="tarif-price">80 €/an</span></div>
-        <div class="tarif-item"><span>Membre associé</span><span class="tarif-price">50 €/an</span></div>
-        <div class="tarif-item"><span>Étudiant / jeune pro</span><span class="tarif-price">20 €/an</span></div>
-        <div class="tarif-item"><span>Personne morale</span><span class="tarif-price">sur devis</span></div>
-        <a href="/contact" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1rem;">Demander l'adhésion →</a>
+        {{ADHESION_TARIFS}}
       </div>
     </div>
   </div>

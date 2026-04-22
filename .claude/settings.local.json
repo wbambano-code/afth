@@ -51,7 +51,14 @@
       "Bash(git init *)",
       "Bash(git branch *)",
       "Bash(git add *)",
-      "Bash(grep -E \"\\\\.env$|node_modules|members\\\\.json|articles\\\\.json|bulletins-index|forum\\\\.db|adherents-test\")"
+      "Bash(grep -E \"\\\\.env$|node_modules|members\\\\.json|articles\\\\.json|bulletins-index|forum\\\\.db|adherents-test\")",
+      "Bash(git rm *)",
+      "Bash(git -c user.email=wbambano@gmail.com -c user.name=wbambano-code commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(grep -E \"\\\\.env$|members\\\\.json|forum\\\\.db|adherents-test\")",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} · %{size_download} octets\\\\n\" http://localhost:3000/assets/images/InstallThermale.jpg)"
     ]
   }
 }

@@ -84,6 +84,7 @@
       <a data-view="bulletins">📄 Bulletins</a>
       <a data-view="articles">📚 Articles</a>
       <a data-view="prix">🏆 Prix</a>
+      <a data-view="adhesion">💳 Adhésion</a>
       <a data-view="members">👥 Membres</a>
       <a data-view="forum">💬 Forum</a>
       <a data-view="prompt">🤖 Prompt IA</a>
@@ -177,6 +178,28 @@
       <div class="card-admin">
         <div id="px-items"></div>
         <button type="button" class="mini-btn" onclick="addPrix()">+ Ajouter un prix</button>
+      </div>
+    </section>
+
+    <!-- ADHÉSION -->
+    <section class="view" id="view-adhesion">
+      <div class="admin-head">
+        <div><h2>💳 Adhésion</h2><p>Bloc « Adhésion » affiché sur la page d'accueil et la page <a href="/association" target="_blank">/association</a>.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="saveAdhesion()">💾 Enregistrer</button>
+      </div>
+      <div class="card-admin">
+        <div class="field"><label>Titre du bloc</label><input id="ad-title" placeholder="Adhésion"></div>
+        <div class="field"><label>Tarifs</label><div id="ad-tarifs"></div>
+          <button type="button" class="mini-btn" onclick="addTarif()">+ Ajouter un tarif</button>
+        </div>
+        <div class="field">
+          <label>Informations de paiement / adresse d'envoi (HTML autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;br&gt;)</label>
+          <textarea id="ad-payment" rows="6" placeholder="Pour entériner votre adhésion, pensez à envoyer le règlement à : ..."></textarea>
+        </div>
+        <div class="row">
+          <div class="field"><label>Texte du bouton (vide = masqué)</label><input id="ad-cta-text" placeholder="Demander l'adhésion →"></div>
+          <div class="field"><label>Lien du bouton</label><input id="ad-cta-href" placeholder="/contact"></div>
+        </div>
       </div>
     </section>
 
@@ -376,6 +399,39 @@ async function load(view) {
   if (view === 'members') loadMembers();
   if (view === 'forum') loadForum();
   if (view === 'prix') loadPrix();
+  if (view === 'adhesion') loadAdhesion();
+}
+
+// ===== ADHÉSION =====
+let adData = { title:'Adhésion', tarifs:[], payment_info_html:'', cta_text:'', cta_href:'/contact' };
+async function loadAdhesion() {
+  adData = await api('/admin/api/adhesion');
+  adData.tarifs = adData.tarifs || [];
+  $('#ad-title').value = adData.title || '';
+  $('#ad-payment').value = adData.payment_info_html || '';
+  $('#ad-cta-text').value = adData.cta_text || '';
+  $('#ad-cta-href').value = adData.cta_href || '';
+  renderTarifs();
+}
+function renderTarifs() {
+  const wrap = $('#ad-tarifs'); wrap.innerHTML = '';
+  adData.tarifs.forEach((t, i) => {
+    const d = document.createElement('div'); d.className = 'sub-item';
+    d.innerHTML = `<button class="rm" onclick="rmTarif(${i})">✕</button>
+      <div class="row"><div class="field"><label>Libellé</label><input value="${esc(t.label||'')}" placeholder="Adhésion (établissement, société)" oninput="adData.tarifs[${i}].label=this.value"></div>
+      <div class="field"><label>Prix</label><input value="${esc(t.price||'')}" placeholder="100 €" oninput="adData.tarifs[${i}].price=this.value"></div></div>`;
+    wrap.appendChild(d);
+  });
+}
+function addTarif() { adData.tarifs.push({ label:'', price:'' }); renderTarifs(); }
+function rmTarif(i) { adData.tarifs.splice(i, 1); renderTarifs(); }
+async function saveAdhesion() {
+  adData.title = $('#ad-title').value;
+  adData.payment_info_html = $('#ad-payment').value;
+  adData.cta_text = $('#ad-cta-text').value;
+  adData.cta_href = $('#ad-cta-href').value;
+  try { await api('/admin/api/adhesion', { method: 'PUT', body: JSON.stringify(adData) }); toast('✓ Adhésion enregistrée'); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
 }
 
 // ===== PRIX =====

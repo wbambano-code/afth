@@ -32,18 +32,20 @@ let actualites = loadJson('data/actualites.json', { main: null, sidebar: [] });
 let congres = loadJson('data/congres.json', { year:2025, theme:'', dates:'', interventions:[] });
 let members = loadJson('data/members.json', []);
 let prix = loadJson('data/prix.json', []);
+let adhesion = loadJson('data/adhesion.json', { title: 'Adhésion', tarifs: [], payment_info_html: '', cta_text: '', cta_href: '/contact' });
 let systemPrompt = 'Tu es l\'assistant technique de l\'AFTh.';
 try { systemPrompt = readFileSync(join(__dirname, 'data/system-prompt.txt'), 'utf8'); } catch {}
 
 console.log(`✓ ${articles.length} articles · ${bulletins.length} bulletins · ${members.length} membres · ${actualites.sidebar.length+1} actus · ${congres.interventions.length} interventions`);
 
-let articleTpl = '', indexTpl = '', congresTpl = '', prixTpl = '', adminLoginTpl = '', adminTpl = '';
+let articleTpl = '', indexTpl = '', congresTpl = '', prixTpl = '', associationTpl = '', adminLoginTpl = '', adminTpl = '';
 let memberLoginTpl = '', memberActivateTpl = '', memberResetReqTpl = '', memberResetConfirmTpl = '', memberProfileTpl = '';
 let forumIndexTpl = '', forumCategoryTpl = '', forumThreadTpl = '', forumNewThreadTpl = '';
 try { articleTpl = readFileSync(join(__dirname, 'pages/_article-template.html'), 'utf8'); } catch {}
 try { indexTpl = readFileSync(join(__dirname, 'pages/index.html'), 'utf8'); } catch {}
 try { congresTpl = readFileSync(join(__dirname, 'pages/congres.html'), 'utf8'); } catch {}
 try { prixTpl = readFileSync(join(__dirname, 'pages/prix.html'), 'utf8'); } catch {}
+try { associationTpl = readFileSync(join(__dirname, 'pages/association.html'), 'utf8'); } catch {}
 try { adminLoginTpl = readFileSync(join(__dirname, 'pages/_admin-login.html'), 'utf8'); } catch {}
 try { adminTpl = readFileSync(join(__dirname, 'pages/_admin.html'), 'utf8'); } catch {}
 try { memberLoginTpl = readFileSync(join(__dirname, 'pages/_member-login.html'), 'utf8'); } catch {}
@@ -104,6 +106,22 @@ function renderActualites(d) {
     </article>`;
   }).join('');
   return `<div class="actu-grid">${main}<aside class="actu-sidebar">${sidebar}</aside></div>`;
+}
+
+function renderAdhesionTarifs(d) {
+  const tarifs = (d.tarifs || []).map(t =>
+    `<div class="tarif-item"><span>${escapeHtml(t.label || '')}</span><span class="tarif-price">${escapeHtml(t.price || '')}</span></div>`
+  ).join('');
+  const payment = d.payment_info_html
+    ? `<div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.12);font-size:.82rem;color:rgba(255,255,255,.78);line-height:1.7;">${d.payment_info_html}</div>`
+    : '';
+  const cta = d.cta_text
+    ? `<a href="${escapeHtml(d.cta_href || '/contact')}" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1rem;">${escapeHtml(d.cta_text)}</a>`
+    : '';
+  return `<h3 style="font-family:var(--font-h);color:#fff;margin-bottom:.9rem;font-size:1.1rem;">${escapeHtml(d.title || 'Adhésion')}</h3>
+    ${tarifs}
+    ${payment}
+    ${cta}`;
 }
 
 function renderPrixItem(p) {
@@ -422,7 +440,14 @@ app.get('/', (req, res) => {
   res.send(renderPage(indexTpl, {
     HERO_CARD: renderHeroCard(heroCard),
     ACTUALITES: renderActualites(actualites),
-    CONGRES_CARD: renderCongresCard(congres, false)
+    CONGRES_CARD: renderCongresCard(congres, false),
+    ADHESION_TARIFS: renderAdhesionTarifs(adhesion)
+  }));
+});
+
+app.get('/association', (req, res) => {
+  res.send(renderPage(associationTpl, {
+    ADHESION_TARIFS: renderAdhesionTarifs(adhesion)
   }));
 });
 
@@ -446,7 +471,6 @@ app.get('/prix', (req, res) => {
 
 // === Autres pages statiques ===
 const STATIC_PAGES = {
-  '/association': 'pages/association.html',
   '/archives': 'pages/archives.html',
   '/articles': 'pages/articles.html',
   '/contact': 'pages/contact.html',
@@ -602,6 +626,14 @@ app.put('/admin/api/prix', requireAuth, (req, res) => {
   if (!Array.isArray(req.body)) return res.status(400).json({ error: 'tableau requis' });
   prix = req.body;
   saveJson('data/prix.json', prix);
+  res.json({ ok: true });
+});
+
+// --- Adhésion ---
+app.get('/admin/api/adhesion', requireAuth, (req, res) => res.json(adhesion));
+app.put('/admin/api/adhesion', requireAuth, (req, res) => {
+  adhesion = req.body || {};
+  saveJson('data/adhesion.json', adhesion);
   res.json({ ok: true });
 });
 
