@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+  <style>
+    body{background:linear-gradient(155deg,#06131e 0%,#0f3d50 50%,#1a5f7a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .login-card{background:var(--c-white);border-radius:var(--rad-lg);padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:400px;width:100%}
+    .login-card h1{font-size:1.5rem;margin-bottom:.4rem}
+    .login-sub{color:var(--c-text-lt);font-size:.88rem;margin-bottom:1.5rem}
+    .login-card input{width:100%;padding:.8rem 1rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.95rem;outline:none;transition:var(--tr);margin-bottom:1rem}
+    .login-card input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .login-card button{width:100%;justify-content:center}
+    .err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:.7rem .9rem;border-radius:var(--rad);font-size:.85rem;margin-bottom:1rem;display:none}
+    .err.show{display:block}
+    .back{text-align:center;margin-top:1rem;font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h1>🔐 Administration AFTh</h1>
+    <p class="login-sub">Authentifiez-vous pour administrer le contenu du site.</p>
+    <div class="err" id="err"></div>
+    <form id="login-form">
+      <input type="password" id="password" placeholder="Mot de passe admin" autofocus required>
+      <button type="submit" class="btn btn-blue">Se connecter</button>
+    </form>
+    <div class="back"><a href="/">← Retour au site</a></div>
+  </div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('password').value;
+  const err = document.getElementById('err');
+  err.classList.remove('show');
+  try {
+    const res = await fetch('/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    location.href = '/admin';
+  } catch (e) {
+    err.textContent = '⚠ ' + e.message;
+    err.classList.add('show');
+  }
+});
+</script>
+</body>
+</html>

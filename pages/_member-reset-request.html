@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mot de passe oublié — AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+  <style>
+    body{background:linear-gradient(155deg,#06131e 0%,#0f3d50 45%,#1a5f7a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .auth-card{background:#fff;border-radius:var(--rad-lg);padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:420px;width:100%}
+    .auth-card h1{font-size:1.4rem;margin-bottom:.3rem}
+    .auth-sub{color:var(--c-text-lt);font-size:.88rem;margin-bottom:1.75rem}
+    .auth-card .field{margin-bottom:1rem}
+    .auth-card input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.95rem;outline:none;transition:var(--tr)}
+    .auth-card input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .auth-card .btn{width:100%;justify-content:center}
+    .ok-banner{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:1rem;border-radius:var(--rad);font-size:.9rem;margin-bottom:1rem;display:none}
+    .ok-banner.show{display:block}
+    .field-label{display:block;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-lt);margin-bottom:.3rem}
+    .back{text-align:center;margin-top:1rem;font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <h1>🔑 Mot de passe oublié</h1>
+    <p class="auth-sub">Saisissez votre email d'adhérent — si votre compte existe, vous recevrez un lien de réinitialisation valable 30 minutes.</p>
+    <div class="ok-banner" id="ok">✓ Si un compte actif existe avec cet email, un lien vient d'être envoyé. Vérifiez votre boîte (et les spams).</div>
+    <form id="f">
+      <div class="field"><label class="field-label">Email</label><input type="email" id="email" autofocus required></div>
+      <button type="submit" class="btn btn-blue">Envoyer le lien</button>
+    </form>
+    <div class="back"><a href="/membres/login">← Retour à la connexion</a></div>
+  </div>
+<script>
+document.getElementById('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  try {
+    await fetch('/membres/mot-de-passe-oublie', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+  } catch (_) {}
+  document.getElementById('f').style.display = 'none';
+  document.getElementById('ok').classList.add('show');
+});
+</script>
+</body>
+</html>

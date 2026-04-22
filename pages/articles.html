@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFTh — Articles techniques archivés</title>
+  <meta name="description" content="150+ articles techniques des congrès AFTh indexés et interrogeables. Recherche par mot-clé, filtrage par thème, accès direct aux originaux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img class="nav-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
+      <div><span class="nav-name">AFTh</span><span class="nav-sub">Techniques Hydrothermales</span></div>
+    </a>
+    <nav>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/association">L'AFTh</a></li>
+        <li><a href="/congres">Congrès</a></li>
+        <li><a href="/prix">Prix Initiative</a></li>
+        <li><a href="/archives">Archives</a></li>
+        <li><a href="/articles">Articles</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/membres/login">🔑 Membre</a></li>
+        <li><a href="#" class="ai-link" id="nav-ai-btn">🤖 IA</a></li>
+      </ul>
+    </nav>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <span class="eyebrow">Base de connaissance</span>
+    <h1>Articles Techniques Archivés</h1>
+    <p class="page-hero-desc">150+ articles techniques indexés des congrès AFTh (2004-2025) et interrogeables via notre assistant IA. Recherchez, filtrez par thème, accédez à l'original.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="search-wrap">
+      <input type="text" id="search-input" placeholder="Rechercher un article (entartrage, radon, énergie, bouéthermes…)">
+      <button class="btn btn-blue btn-sm" type="button" onclick="document.getElementById('search-input').dispatchEvent(new Event('input'))">🔍</button>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" data-theme="all">Tous</button>
+      <div id="filters-dynamic" style="display:contents;"></div>
+    </div>
+    <p class="lead" style="margin-bottom:1rem;"><span id="articles-count">–</span> <span style="font-size:.85rem;color:var(--c-text-lt);">· résultats indexés depuis les congrès AFTh</span></p>
+    <div class="articles-list" id="articles-list">
+      <p style="text-align:center;padding:2rem;color:var(--c-text-lt);">Chargement…</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img class="footer-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
+        <div class="footer-brand">Association Française des Techniques Hydrothermales</div>
+        <p class="footer-desc">Spécialistes du thermalisme technique réunis depuis 2004 : ingénieurs, techniciens, gestionnaires, fournisseurs et scientifiques.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Navigation</p>
+        <ul class="footer-links">
+          <li><a href="/">Accueil</a></li><li><a href="/association">L'AFTh</a></li>
+          <li><a href="/congres">Congrès &amp; Publications</a></li>
+          <li><a href="/prix">Prix Initiative</a></li>
+          <li><a href="/archives">Archives bulletins</a></li>
+          <li><a href="/articles">Articles techniques</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Partenaires</p>
+        <ul class="footer-links">
+          <li><a href="http://www.medecinethermale.fr/" target="_blank" rel="noopener">CNETH</a></li>
+          <li><a href="http://www.afreth.org/" target="_blank" rel="noopener">AFRETh</a></li>
+          <li><a href="https://arconseil-eau.fr/" target="_blank" rel="noopener">AR Conseil Eau</a></li>
+          <li><a href="http://www.symposium-thermal.org/" target="_blank" rel="noopener">Symposium Thermal</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <ul class="footer-links">
+          <li><span>1 rue Cels, 75014 Paris</span></li>
+          <li><a href="tel:+33153910575">01 53 91 05 75</a></li>
+          <li><a href="mailto:info@afth.asso.fr">info@afth.asso.fr</a></li>
+          <li><a href="/contact">Formulaire de contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 AFTh — Association Française des Techniques Hydrothermales</span>
+      <div class="footer-partners">
+        <a href="http://www.medecinethermale.fr/" target="_blank" rel="noopener">CNETH</a>
+        <a href="http://www.afreth.org/" target="_blank" rel="noopener">AFRETh</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="chat-launcher">
+  <button class="chat-btn" id="chat-launcher-btn" aria-label="Assistant IA AFTh">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="chat-badge">IA</span>
+  </button>
+  <div class="chat-tooltip">Assistant IA AFTh</div>
+</div>
+<div class="chat-window" id="chat-win" role="dialog" aria-label="Assistant IA" aria-hidden="true">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">🌊</div>
+      <div><div class="chat-name">Assistant AFTh</div><div class="chat-sub">Archives 2004–2025</div></div>
+    </div>
+    <button class="chat-close" id="chat-close-btn" aria-label="Fermer">✕</button>
+  </div>
+  <div class="chat-suggestions" id="chat-sugs"></div>
+  <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"></div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chat-input" placeholder="Votre question technique…" rows="1"></textarea>
+    <button class="chat-send" id="chat-send-btn" aria-label="Envoyer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="chat-disclaimer">Propulsé par Claude (Anthropic) · Sources : archives AFTh</div>
+</div>
+<button class="scroll-top" aria-label="Haut de page">↑</button>
+<script src="/js/main.js"></script>
+<script src="/js/chat.js"></script>
+</body>
+</html>

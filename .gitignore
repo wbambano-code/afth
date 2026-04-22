@@ -1,0 +1,11 @@
+node_modules/
+.env
+data/articles.json
+data/bulletins-index.json
+data/system-prompt.backup.txt
+data/members.json
+data/forum.db
+data/forum.db-journal
+data/forum.db-wal
+data/forum.db-shm
+adherents-test-2026.xlsx

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation de votre compte — AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+  <style>
+    body{background:linear-gradient(155deg,#06131e 0%,#0f3d50 45%,#1a5f7a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .auth-card{background:#fff;border-radius:var(--rad-lg);padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:420px;width:100%}
+    .auth-card h1{font-size:1.4rem;margin-bottom:.3rem}
+    .auth-sub{color:var(--c-text-lt);font-size:.88rem;margin-bottom:1.75rem}
+    .auth-card .field{margin-bottom:1rem}
+    .auth-card input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.95rem;outline:none;transition:var(--tr)}
+    .auth-card input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .auth-card .btn{width:100%;justify-content:center}
+    .err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:.7rem .9rem;border-radius:var(--rad);font-size:.85rem;margin-bottom:1rem;display:none}
+    .err.show{display:block}
+    .ok-banner{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:1rem;border-radius:var(--rad);font-size:.9rem;margin-bottom:1rem}
+    .field-label{display:block;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-lt);margin-bottom:.3rem}
+    .hint{font-size:.78rem;color:var(--c-text-lt);margin-top:.3rem}
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <h1>🌊 Activation du compte</h1>
+
+    <div id="invalid-state" style="display:none;">
+      <div class="err show" style="margin-top:1rem;">⚠ Lien invalide ou expiré. Contactez l'AFTh pour obtenir un nouveau lien d'activation.</div>
+      <div style="text-align:center;margin-top:1rem;"><a href="/membres/login">← Connexion</a></div>
+    </div>
+
+    <div id="ok-state" style="display:none;">
+      <p class="auth-sub">Bienvenue ! Choisissez un mot de passe pour finaliser votre accès à l'espace membres.</p>
+      <div id="success" class="ok-banner" style="display:none;">
+        ✓ Compte activé avec succès.<br>
+        <a href="/membres/login" style="color:#065f46;font-weight:700;">Se connecter →</a>
+      </div>
+      <div class="err" id="err"></div>
+      <form id="f" style="display:block;">
+        <div class="field" style="background:var(--c-bg-alt);padding:.6rem .85rem;border-radius:var(--rad);font-size:.88rem;">
+          <span style="color:var(--c-text-lt);font-size:.78rem;">Compte pour :</span>
+          <strong>{{EMAIL}}</strong>
+        </div>
+        <div class="field"><label class="field-label">Mot de passe</label>
+          <input type="password" id="p1" minlength="8" required>
+          <p class="hint">8 caractères minimum</p></div>
+        <div class="field"><label class="field-label">Confirmation</label><input type="password" id="p2" minlength="8" required></div>
+        <button type="submit" class="btn btn-blue">Activer mon compte</button>
+      </form>
+    </div>
+  </div>
+<script>
+const state = '{{STATE}}';
+document.getElementById(state === 'ok' ? 'ok-state' : 'invalid-state').style.display = 'block';
+if (state === 'ok') {
+  document.getElementById('f').addEventListener('submit', async e => {
+    e.preventDefault();
+    const p1 = document.getElementById('p1').value;
+    const p2 = document.getElementById('p2').value;
+    const err = document.getElementById('err');
+    err.classList.remove('show');
+    if (p1 !== p2) { err.textContent = '⚠ Les deux mots de passe ne correspondent pas'; err.classList.add('show'); return; }
+    try {
+      const res = await fetch('/membres/activer', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: '{{TOKEN}}', password: p1 })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      document.getElementById('f').style.display = 'none';
+      document.getElementById('success').style.display = 'block';
+    } catch (e) {
+      err.textContent = '⚠ ' + e.message; err.classList.add('show');
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "label": "Congrès annuel — Novembre 2025",
+  "title": "Gestion de la radioactivité dans les établissements thermaux",
+  "location": "📍 La Bourboule / Mont Dore",
+  "speakers": [
+    { "name": "R. AINOUCHE", "topic": "Actualité réglementaire & enquête radioactivité" },
+    { "name": "P. GIRON", "topic": "Contrôle réglementaire — Thermes de La Bourboule" },
+    { "name": "C. NAULEAU", "topic": "CEREMA — Expertise technique Radon & ventilation" }
+  ]
+}

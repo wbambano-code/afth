@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{THREAD_TITLE}} — Forum AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img class="nav-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
+      <div><span class="nav-name">AFTh</span><span class="nav-sub">Espace membre</span></div>
+    </a>
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="/">Site public</a></li>
+        <li><a href="/forum">💬 Forum</a></li>
+        <li><a href="/membres/profil">👤 Profil</a></li>
+        <li><a href="#" onclick="fetch('/membres/logout',{method:'POST'}).then(()=>location.href='/membres/login');return false;">↪ Déconnexion</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section style="padding:calc(var(--nav-h) + 2rem) 0 3rem;background:var(--c-bg-alt);min-height:80vh;">
+  <div class="forum-wrap">
+    <div class="forum-breadcrumb"><a href="/forum">💬 Forum</a> › <a href="/forum/c/{{CAT_SLUG}}">{{CAT_ICON}} {{CAT_NAME}}</a> › <strong>Fil</strong></div>
+    <div class="forum-head">
+      <div>
+        <h1>{{THREAD_TITLE}}</h1>
+        <p>{{POST_COUNT}} post(s) dans cette discussion</p>
+      </div>
+    </div>
+
+    {{POSTS}}
+
+    <div class="reply-box">
+      <h3 style="margin-bottom:.6rem;font-size:1rem;">Répondre au fil</h3>
+      <textarea id="reply-body" placeholder="Votre message — markdown léger supporté (**gras**, *italique*, `code`, [liens](https://…), > citation)"></textarea>
+      <p class="md-hint">Formatage : <code>**gras**</code> · <code>*italique*</code> · <code>[texte](url)</code> · <code>`code`</code> · <code>&gt; citation</code></p>
+      <button class="btn btn-blue btn-sm" onclick="postReply()">📨 Publier la réponse</button>
+    </div>
+  </div>
+</section>
+
+<div class="dialog-backdrop" id="dlg-edit" style="display:none;position:fixed;inset:0;background:rgba(8,24,38,.55);align-items:center;justify-content:center;z-index:900;">
+  <div style="background:#fff;border-radius:var(--rad-lg);max-width:640px;width:calc(100% - 2rem);padding:1.75rem;">
+    <h3 style="margin-bottom:1rem;">Modifier le post</h3>
+    <textarea id="edit-body" style="width:100%;min-height:180px;padding:.8rem .95rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.92rem;resize:vertical;outline:none;line-height:1.6;"></textarea>
+    <div style="display:flex;gap:.5rem;margin-top:1rem;">
+      <button class="btn btn-blue btn-sm" onclick="saveEdit()">💾 Enregistrer</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('dlg-edit').style.display='none'">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:1.5rem;right:1.5rem;background:var(--c-primary-dk);color:#fff;padding:.8rem 1.2rem;border-radius:var(--rad);font-size:.88rem;box-shadow:var(--sh-md);opacity:0;pointer-events:none;transition:all .25s;z-index:1000;"></div>
+
+<script>
+const THREAD_ID = '{{THREAD_ID}}';
+let editingId = null;
+
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'err' ? '#991b1b' : (type === 'ok' ? '#059669' : 'var(--c-primary-dk)');
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 2500);
+}
+
+async function postReply() {
+  const body = document.getElementById('reply-body').value.trim();
+  if (!body) return toast('Message vide', 'err');
+  try {
+    const res = await fetch(`/forum/api/threads/${THREAD_ID}/reply`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    location.reload();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+async function editPost(id) {
+  editingId = id;
+  const el = document.getElementById('post-body-' + id);
+  // Pour ré-éditer, on récupère le texte brut depuis le HTML : impossible proprement.
+  // Solution pragmatique : afficher le HTML rendu comme point de départ, l'utilisateur peut réécrire.
+  // Pour faire propre, on charge le markdown original via un endpoint GET.
+  try {
+    const res = await fetch(`/forum/api/posts/${id}/raw`);
+    if (res.ok) {
+      document.getElementById('edit-body').value = (await res.json()).body;
+    } else {
+      document.getElementById('edit-body').value = el.textContent || '';
+    }
+  } catch {
+    document.getElementById('edit-body').value = el.textContent || '';
+  }
+  document.getElementById('dlg-edit').style.display = 'flex';
+}
+
+async function saveEdit() {
+  const body = document.getElementById('edit-body').value.trim();
+  if (!body) return toast('Message vide', 'err');
+  try {
+    const res = await fetch(`/forum/api/posts/${editingId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    location.reload();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+async function deletePost(id, isFirst) {
+  const msg = isFirst ? 'Supprimer ce post ?\n\n⚠ C\'est le premier post du fil : le fil entier sera supprimé.' : 'Supprimer ce post ?';
+  if (!confirm(msg)) return;
+  try {
+    const res = await fetch(`/forum/api/posts/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (data.threadDeleted) location.href = '/forum/c/{{CAT_SLUG}}';
+    else location.reload();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+</script>
+</body>
+</html>

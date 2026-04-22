@@ -1,0 +1,15 @@
+{
+  "year": 2025,
+  "dates": "Novembre 2025 · La Bourboule / Mont Dore",
+  "theme": "Gestion de la radioactivité dans les établissements thermaux",
+  "interventions": [
+    { "speaker": "R. AINOUCHE", "affiliation": "A.R. Conseil", "title": "Actualité réglementaire — Enquête sur la radioactivité dans les établissements thermaux" },
+    { "speaker": "L. BOUCHET CHEYMOL", "affiliation": "CNETH", "title": "Le risque professionnel Radon en milieu thermal" },
+    { "speaker": "N. MAURILLON / C. LAMOTTE", "affiliation": "EAUGEO Environnement / BRGM", "title": "Qu'est-ce que la radioactivité ? Fondamentaux appliqués aux eaux thermales" },
+    { "speaker": "P. GIRON", "affiliation": "Thermes de La Bourboule", "title": "Contrôle réglementaire en établissement thermal : retour d'expérience" },
+    { "speaker": "C. NAULEAU", "affiliation": "CEREMA", "title": "Expertise technique Radon / Ventilation — métrologie et solutions" },
+    { "speaker": "V. BLATTNER", "affiliation": "KAPPA Ingénierie", "title": "Ingénierie et études autour de la radioactivité dans les établissements thermaux" },
+    { "speaker": "B. MONSSUS", "affiliation": "Thermes de Bourbon-Lancy", "title": "Analyse des résultats après travaux : efficacité et pérennité des solutions" },
+    { "speaker": "MEMOSOL", "affiliation": "—", "title": "Gestion des risques Radon — Outil numérique de gestion des circuits d'eau thermale" }
+  ]
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{CAT_NAME}} — Forum AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img class="nav-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
+      <div><span class="nav-name">AFTh</span><span class="nav-sub">Espace membre</span></div>
+    </a>
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="/">Site public</a></li>
+        <li><a href="/forum">💬 Forum</a></li>
+        <li><a href="/membres/profil">👤 Profil</a></li>
+        <li><a href="#" onclick="fetch('/membres/logout',{method:'POST'}).then(()=>location.href='/membres/login');return false;">↪ Déconnexion</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section style="padding:calc(var(--nav-h) + 2rem) 0 3rem;background:var(--c-bg-alt);min-height:80vh;">
+  <div class="forum-wrap">
+    <div class="forum-breadcrumb"><a href="/forum">💬 Forum</a> › <strong>{{CAT_ICON}} {{CAT_NAME}}</strong></div>
+    <div class="forum-head">
+      <div>
+        <h1>{{CAT_ICON}} {{CAT_NAME}}</h1>
+        <p>{{CAT_DESC}}</p>
+      </div>
+      <a href="/forum/c/{{CAT_SLUG}}/nouveau" class="btn btn-blue btn-sm">+ Nouveau fil</a>
+    </div>
+
+    <div class="forum-section">
+      {{THREADS}}
+    </div>
+  </div>
+</section>
+</body>
+</html>

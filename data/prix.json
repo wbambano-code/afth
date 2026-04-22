@@ -1,0 +1,42 @@
+[
+  {
+    "id": "prix-2025-beraud",
+    "year": 2025,
+    "label": "🏆 Prix d'Honneur — Première édition",
+    "title": "Jean-François Béraud — Président de la FTCF",
+    "body_html": "<p>Pour la première fois de son histoire, l'AFTh décerne un <strong>Prix d'Honneur</strong>. Il salue Jean-François Béraud, président de la <strong>Fédération Thermale et Climatique Française (FTCF)</strong>, qui met fin à ses activités thermales à La Bourboule.</p>\n<p>JF Béraud a été l'un des fondateurs du <strong>Laboratoire Thermauvergne</strong>, un pilier de l'<strong>Observatoire du thermalisme</strong>, l'un des artisans de la <strong>Route des villes d'eaux</strong> et un moteur des <strong>clusters thermaux</strong> régionaux.</p>\n<p>Sur plusieurs décennies, il a porté une vision technique et stratégique du thermalisme français. L'AFTh lui exprime, par ce Prix d'Honneur inédit, sa reconnaissance pour un engagement qui a marqué durablement la profession.</p>",
+    "featured": true
+  },
+  {
+    "id": "prix-2024",
+    "year": 2024,
+    "label": "Prix de l'Initiative",
+    "title": "Réalisations de décarbonation thermale",
+    "body_html": "<p>Édition consacrée aux initiatives de réduction d'empreinte carbone — voir le bulletin 2024 pour le détail.</p>",
+    "featured": false
+  },
+  {
+    "id": "prix-2023",
+    "year": 2023,
+    "label": "Prix de l'Initiative",
+    "title": "Innovation en contrôle sanitaire",
+    "body_html": "<p>Voir le bulletin 2023 pour les lauréats et leurs réalisations.</p>",
+    "featured": false
+  },
+  {
+    "id": "prix-2022",
+    "year": 2022,
+    "label": "Prix de l'Initiative",
+    "title": "Optimisation énergétique en milieu thermal",
+    "body_html": "<p>Voir le bulletin 2022 pour les lauréats et leurs réalisations.</p>",
+    "featured": false
+  },
+  {
+    "id": "prix-pre-2022",
+    "year": 2021,
+    "label": "Archives complètes",
+    "title": "Lauréats antérieurs",
+    "body_html": "<p>Lauréat non documenté en ligne pour les éditions antérieures à 2022 — consultez les <a href=\"/archives\">bulletins archivés</a> ou contactez l'association.</p>",
+    "featured": false
+  }
+]

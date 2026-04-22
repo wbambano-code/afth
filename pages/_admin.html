@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <style>
+    body{background:var(--c-bg-alt)}
+    .admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+    .admin-side{background:var(--c-bg-dark);color:#fff;padding:1.5rem 0;display:flex;flex-direction:column}
+    .admin-brand{padding:0 1.5rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:1rem}
+    .admin-brand h1{color:#fff;font-size:1rem;font-family:var(--font-h)}
+    .admin-brand span{font-size:.7rem;color:var(--c-accent);letter-spacing:.15em;text-transform:uppercase}
+    .admin-nav{flex:1;display:flex;flex-direction:column;gap:.2rem;padding:0 .8rem}
+    .admin-nav a{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;color:rgba(255,255,255,.6);border-radius:8px;font-size:.9rem;font-weight:500;cursor:pointer;transition:var(--tr)}
+    .admin-nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+    .admin-nav a.active{background:var(--c-primary);color:#fff}
+    .admin-foot{padding:1.5rem;border-top:1px solid rgba(255,255,255,.08);font-size:.8rem;color:rgba(255,255,255,.4)}
+    .admin-foot a{color:var(--c-accent)}
+    .admin-main{padding:2rem 2.5rem;overflow-y:auto;max-height:100vh}
+    .admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+    .admin-head h2{font-size:1.4rem;margin-bottom:.2rem}
+    .admin-head p{color:var(--c-text-lt);font-size:.88rem;margin:0}
+    .card-admin{background:var(--c-white);border-radius:var(--rad-lg);padding:1.5rem;box-shadow:var(--sh-sm);margin-bottom:1rem}
+    .field{margin-bottom:1rem}
+    .field label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c-text-lt);margin-bottom:.35rem}
+    .field input,.field select,.field textarea{width:100%;padding:.6rem .85rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.9rem;outline:none;transition:var(--tr);background:#fff}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .field textarea{min-height:110px;resize:vertical;font-family:var(--font-b);line-height:1.6}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem}
+    .sub-item{background:var(--c-bg-alt);padding:1rem;border-radius:var(--rad);border:1px dashed var(--c-border);margin-bottom:.7rem;position:relative}
+    .sub-item .rm{position:absolute;top:.5rem;right:.5rem;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;border-radius:6px;padding:.2rem .6rem;font-size:.72rem;cursor:pointer}
+    .sub-item .rm:hover{background:#fca5a5}
+    .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--c-primary-dk);color:#fff;padding:.8rem 1.2rem;border-radius:var(--rad);font-size:.88rem;box-shadow:var(--sh-md);opacity:0;pointer-events:none;transition:var(--tr);z-index:1000}
+    .toast.show{opacity:1}
+    .toast.ok{background:var(--c-success,#2d8a5a)}
+    .toast.err{background:#991b1b}
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    table th{background:var(--c-bg-alt);text-align:left;padding:.6rem .8rem;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--c-text-lt);font-weight:700}
+    table td{padding:.6rem .8rem;border-bottom:1px solid var(--c-border)}
+    table tr:hover td{background:var(--c-bg-alt)}
+    .mini-btn{background:var(--c-bg-alt);border:1px solid var(--c-border);border-radius:6px;padding:.25rem .6rem;font-size:.75rem;cursor:pointer;transition:var(--tr)}
+    .mini-btn:hover{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
+    .mini-btn.danger{color:#991b1b}
+    .mini-btn.danger:hover{background:#991b1b;color:#fff;border-color:#991b1b}
+    .view{display:none}
+    .view.active{display:block}
+    .search-box{margin-bottom:1rem;padding:.6rem .9rem;width:100%;border:1.5px solid var(--c-border);border-radius:var(--rad);font-size:.9rem}
+    .dialog-backdrop{position:fixed;inset:0;background:rgba(8,24,38,.55);display:none;align-items:center;justify-content:center;z-index:900}
+    .dialog-backdrop.show{display:flex}
+    .dialog{background:#fff;border-radius:var(--rad-lg);max-width:600px;width:calc(100% - 2rem);max-height:85vh;overflow-y:auto;padding:1.75rem}
+    .dialog h3{margin-bottom:1rem}
+    .empty{text-align:center;color:var(--c-text-lt);padding:1.5rem;font-size:.9rem}
+    @media (max-width:900px){
+      .admin-layout{grid-template-columns:1fr}
+      .admin-side{position:sticky;top:0;z-index:10;padding:.8rem 1rem}
+      .admin-nav{flex-direction:row;flex-wrap:wrap;padding:0}
+      .admin-brand{display:none}
+      .admin-foot{display:none}
+      .admin-main{padding:1rem}
+      .row,.row-3{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="admin-side">
+    <div class="admin-brand">
+      <h1>AFTh Admin</h1>
+      <span>Back-office</span>
+    </div>
+    <nav class="admin-nav" id="admin-nav">
+      <a data-view="hero" class="active">🏠 Vignette accueil</a>
+      <a data-view="actus">📰 Actualités</a>
+      <a data-view="congres">🎤 Congrès</a>
+      <a data-view="bulletins">📄 Bulletins</a>
+      <a data-view="articles">📚 Articles</a>
+      <a data-view="prix">🏆 Prix</a>
+      <a data-view="members">👥 Membres</a>
+      <a data-view="forum">💬 Forum</a>
+      <a data-view="prompt">🤖 Prompt IA</a>
+    </nav>
+    <div class="admin-foot">
+      <a href="/" target="_blank">→ Voir le site</a><br>
+      <a id="logout" style="cursor:pointer;">↪ Se déconnecter</a>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- VIGNETTE ACCUEIL -->
+    <section class="view active" id="view-hero">
+      <div class="admin-head">
+        <div><h2>🏠 Vignette accueil</h2><p>Carte « Congrès annuel » affichée en haut à droite de la page d'accueil.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="saveHero()">💾 Enregistrer</button>
+      </div>
+      <form class="card-admin" id="hero-form" onsubmit="event.preventDefault();saveHero()">
+        <div class="field"><label>Label supérieur</label><input id="h-label" placeholder="Congrès annuel — Novembre 2025"></div>
+        <div class="field"><label>Titre</label><input id="h-title"></div>
+        <div class="field"><label>Lieu (avec emoji si souhaité)</label><input id="h-location" placeholder="📍 La Bourboule / Mont Dore"></div>
+        <div class="field"><label>Intervenants mis en avant (3 max conseillé)</label><div id="h-speakers"></div>
+          <button type="button" class="mini-btn" onclick="addSpeaker()">+ Ajouter intervenant</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ACTUALITÉS -->
+    <section class="view" id="view-actus">
+      <div class="admin-head">
+        <div><h2>📰 Actualités</h2><p>Actualité principale et cartes sidebar de la page d'accueil.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="saveActus()">💾 Enregistrer</button>
+      </div>
+
+      <div class="card-admin">
+        <h3 style="margin-bottom:1rem;">📌 Actualité principale</h3>
+        <div class="field"><label>Label</label><input id="a-main-label" placeholder="Prix d'Honneur · 2025"></div>
+        <div class="field"><label>Titre</label><input id="a-main-title"></div>
+        <div class="field"><label>Image (chemin, ex : /assets/images/beraud.jpg)</label><input id="a-main-image"></div>
+        <div class="field"><label>Contenu (HTML autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;)</label><textarea id="a-main-body" rows="7"></textarea></div>
+        <div class="row">
+          <div class="field"><label>Texte bouton (vide pour masquer)</label><input id="a-main-cta-text" placeholder="Voir le Prix complet →"></div>
+          <div class="field"><label>Lien bouton</label><input id="a-main-cta-href" placeholder="/prix"></div>
+        </div>
+      </div>
+
+      <div class="card-admin">
+        <h3 style="margin-bottom:1rem;">📎 Cartes sidebar</h3>
+        <div id="a-sidebar"></div>
+        <button type="button" class="mini-btn" onclick="addSideItem()">+ Ajouter carte sidebar</button>
+      </div>
+    </section>
+
+    <!-- CONGRÈS -->
+    <section class="view" id="view-congres">
+      <div class="admin-head">
+        <div><h2>🎤 Congrès annuel</h2><p>Programme affiché sur la page d'accueil et sur /congres.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="saveCongres()">💾 Enregistrer</button>
+      </div>
+      <form class="card-admin" onsubmit="event.preventDefault();saveCongres()">
+        <div class="row">
+          <div class="field"><label>Année</label><input type="number" id="c-year" min="2000" max="2100"></div>
+          <div class="field"><label>Dates / lieu</label><input id="c-dates" placeholder="Novembre 2025 · La Bourboule / Mont Dore"></div>
+        </div>
+        <div class="field"><label>Thème</label><input id="c-theme"></div>
+        <div class="field"><label>Interventions</label><div id="c-interventions"></div>
+          <button type="button" class="mini-btn" onclick="addIntervention()">+ Ajouter intervention</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- BULLETINS -->
+    <section class="view" id="view-bulletins">
+      <div class="admin-head">
+        <div><h2>📄 Bulletins</h2><p>Les 22 bulletins annuels. Upload PDF + modification du thème.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="openAddBulletin()">+ Nouveau bulletin</button>
+      </div>
+      <div class="card-admin" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Année</th><th>Thème</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody id="b-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- PRIX -->
+    <section class="view" id="view-prix">
+      <div class="admin-head">
+        <div><h2>🏆 Prix de l'Initiative</h2><p>Page <a href="/prix" target="_blank">/prix</a> — édition à venir, éditions passées.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="savePrix()">💾 Enregistrer</button>
+      </div>
+      <div class="card-admin">
+        <div id="px-items"></div>
+        <button type="button" class="mini-btn" onclick="addPrix()">+ Ajouter un prix</button>
+      </div>
+    </section>
+
+    <!-- MEMBRES -->
+    <section class="view" id="view-members">
+      <div class="admin-head">
+        <div><h2>👥 Espace membres</h2><p id="mb-count">–</p></div>
+        <div style="display:flex;gap:.5rem;">
+          <label class="btn btn-blue btn-sm" style="cursor:pointer;">📥 Importer adhérents (.xlsx/.csv)
+            <input type="file" id="mb-file" accept=".xlsx,.csv,.xls" style="display:none;">
+          </label>
+        </div>
+      </div>
+
+      <div class="card-admin" id="mb-diff-wrap" style="display:none;">
+        <h3 style="margin-bottom:.7rem;">Prévisualisation de l'import</h3>
+        <div id="mb-diff-meta" style="font-size:.88rem;color:var(--c-text-lt);margin-bottom:1rem;"></div>
+        <div class="row" style="margin-bottom:1rem;">
+          <div>
+            <h4 style="color:#059669;margin-bottom:.5rem;">➕ À ajouter (<span id="mb-add-count">0</span>)</h4>
+            <div id="mb-add-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--c-border);border-radius:var(--rad);padding:.5rem;background:#f0fdf4;"></div>
+          </div>
+          <div>
+            <h4 style="color:#b91c1c;margin-bottom:.5rem;">➖ À révoquer (<span id="mb-revoke-count">0</span>)</h4>
+            <div id="mb-revoke-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--c-border);border-radius:var(--rad);padding:.5rem;background:#fef2f2;"></div>
+          </div>
+        </div>
+        <div id="mb-errors" style="margin-bottom:1rem;"></div>
+        <div class="actions">
+          <button class="btn btn-blue btn-sm" onclick="applyImport()">✓ Confirmer les changements</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelImport()">Annuler</button>
+        </div>
+      </div>
+
+      <div class="card-admin" id="mb-sendmail-wrap" style="display:none;">
+        <h3 style="margin-bottom:.7rem;">Changements appliqués ✓</h3>
+        <p style="font-size:.88rem;color:var(--c-text-lt);">
+          Un dernier clic pour envoyer les emails (activation pour les nouveaux, désabonnement pour les sortants).
+          En mode dev (SMTP non configuré), les emails sont loggés dans la console serveur.
+        </p>
+        <div class="actions">
+          <button class="btn btn-blue btn-sm" onclick="sendEmails()">✉ Envoyer les emails</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelImport()">Passer (ne rien envoyer)</button>
+        </div>
+      </div>
+
+      <input class="search-box" id="mb-search" placeholder="Filtrer par nom ou email…">
+      <div class="card-admin" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Email</th><th>Nom</th><th>Structure</th><th>Statut</th><th>Dernière connexion</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody id="mb-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- FORUM -->
+    <section class="view" id="view-forum">
+      <div class="admin-head">
+        <div><h2>💬 Forum — modération</h2><p id="fm-count">–</p></div>
+        <a href="/forum" target="_blank" class="btn btn-ghost btn-sm">→ Voir le forum</a>
+      </div>
+      <input class="search-box" id="fm-search" placeholder="Filtrer par titre ou auteur…">
+      <div class="card-admin" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Catégorie</th><th>Titre</th><th>Auteur</th><th>Posts</th><th>Dernier message</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody id="fm-tbody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- PROMPT IA -->
+    <section class="view" id="view-prompt">
+      <div class="admin-head">
+        <div><h2>🤖 Prompt système de l'IA</h2><p>Instructions envoyées à Claude à chaque requête du chat. Modifiez avec précaution.</p></div>
+        <button class="btn btn-blue btn-sm" onclick="savePrompt()">💾 Enregistrer</button>
+      </div>
+
+      <div class="card-admin" style="background:#fef8ed;border:1px solid #f5d6a3;">
+        <div style="display:flex;gap:.6rem;align-items:flex-start;">
+          <span style="font-size:1.2rem;">⚠️</span>
+          <div style="font-size:.87rem;line-height:1.65;color:#7a4e00;">
+            <strong>Avant de modifier</strong> : le prompt système définit la personnalité, les règles et les limites de l'assistant IA.
+            Une modification maladroite peut dégrader la qualité des réponses ou faire hors-sujet.
+            À chaque sauvegarde, la version précédente est conservée automatiquement — vous pouvez toujours la restaurer.
+          </div>
+        </div>
+      </div>
+
+      <div class="card-admin">
+        <div class="field">
+          <label>Prompt système (texte brut, pas de HTML)</label>
+          <textarea id="p-prompt" rows="22" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;"></textarea>
+          <div style="margin-top:.5rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.8rem;font-size:.78rem;color:var(--c-text-lt);">
+            <span><strong id="p-chars">0</strong> caractères · ≈ <strong id="p-tokens">0</strong> tokens</span>
+            <span id="p-status" style="color:var(--c-text-lt);"></span>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:space-between;">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="mini-btn" id="p-restore-backup" onclick="restorePromptBackup()" disabled>↶ Restaurer version précédente</button>
+            <button class="mini-btn danger" onclick="restorePromptDefault()">⟲ Restaurer le prompt d'origine</button>
+          </div>
+          <button class="btn btn-blue btn-sm" onclick="savePrompt()">💾 Enregistrer</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARTICLES -->
+    <section class="view" id="view-articles">
+      <div class="admin-head">
+        <div><h2>📚 Articles</h2><p id="art-count">–</p></div>
+        <button class="btn btn-blue btn-sm" onclick="openAddArticle()">+ Nouvel article</button>
+      </div>
+      <input class="search-box" id="art-search" placeholder="Filtrer par titre ou thème…">
+      <div class="card-admin" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>ID</th><th>Titre</th><th>Thème</th><th>Année</th><th>Format</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody id="art-tbody"></tbody></table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Dialogs -->
+<div class="dialog-backdrop" id="dlg-bul">
+  <div class="dialog">
+    <h3 id="dlg-bul-title">Nouveau bulletin</h3>
+    <div class="row"><div class="field"><label>Année</label><input type="number" id="dlg-bul-year" min="2000" max="2100"></div>
+      <div class="field"><label>Fichier PDF</label><input type="file" id="dlg-bul-file" accept="application/pdf"></div></div>
+    <div class="field"><label>Thème</label><input id="dlg-bul-theme"></div>
+    <div class="actions"><button class="btn btn-blue btn-sm" onclick="saveBulletin()">💾 Enregistrer</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDlg('dlg-bul')">Annuler</button></div>
+  </div>
+</div>
+
+<div class="dialog-backdrop" id="dlg-art">
+  <div class="dialog">
+    <h3 id="dlg-art-title">Nouvel article</h3>
+    <div class="field"><label>Titre</label><input id="dlg-art-title-in"></div>
+    <div class="row"><div class="field"><label>Thème</label><input id="dlg-art-theme" placeholder="Technique thermale"></div>
+      <div class="field"><label>Année</label><input type="number" id="dlg-art-year" min="1990" max="2100"></div></div>
+    <div class="field">
+      <label>PDF (optionnel — si fourni, la page affichera le PDF au lieu du texte)</label>
+      <input type="file" id="dlg-art-pdf" accept="application/pdf">
+      <div id="dlg-art-pdf-current" style="display:none;margin-top:.5rem;font-size:.82rem;color:var(--c-text-lt);">
+        📄 PDF actuel : <a id="dlg-art-pdf-link" target="_blank"></a>
+        <button type="button" class="mini-btn danger" style="margin-left:.5rem;" onclick="removeArticlePdf()">Retirer le PDF</button>
+      </div>
+    </div>
+    <div class="field"><label>Contenu texte (utilisé si pas de PDF)</label><textarea id="dlg-art-content" rows="8"></textarea></div>
+    <div class="actions"><button class="btn btn-blue btn-sm" onclick="saveArticle()">💾 Enregistrer</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDlg('dlg-art')">Annuler</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = q => document.querySelector(q);
+const $$ = q => [...document.querySelectorAll(q)];
+
+function toast(msg, type='ok') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function api(path, opt={}) {
+  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opt });
+  if (res.status === 401) { location.href = '/admin'; throw new Error('non auth'); }
+  const data = res.headers.get('content-type')?.includes('json') ? await res.json() : await res.text();
+  if (!res.ok) throw new Error(data.error || 'Erreur');
+  return data;
+}
+
+// Nav
+$$('.admin-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    $$('.admin-nav a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    $$('.view').forEach(v => v.classList.remove('active'));
+    $('#view-' + a.dataset.view).classList.add('active');
+    load(a.dataset.view);
+  });
+});
+
+$('#logout').addEventListener('click', async () => {
+  await fetch('/admin/logout', { method: 'POST' });
+  location.href = '/admin';
+});
+
+// ===== HERO =====
+async function load(view) {
+  if (view === 'hero') loadHero();
+  if (view === 'actus') loadActus();
+  if (view === 'congres') loadCongres();
+  if (view === 'bulletins') loadBulletins();
+  if (view === 'articles') loadArticles();
+  if (view === 'prompt') loadPrompt();
+  if (view === 'members') loadMembers();
+  if (view === 'forum') loadForum();
+  if (view === 'prix') loadPrix();
+}
+
+// ===== PRIX =====
+let pxData = [];
+async function loadPrix() {
+  pxData = await api('/admin/api/prix');
+  renderPrix();
+}
+function renderPrix() {
+  const wrap = $('#px-items'); wrap.innerHTML = '';
+  pxData.sort((a,b) => (b.year||0) - (a.year||0));
+  pxData.forEach((p, i) => {
+    const d = document.createElement('div'); d.className = 'sub-item';
+    d.innerHTML = `<button class="rm" onclick="rmPrix(${i})">✕</button>
+      <div class="row-3">
+        <div class="field"><label>Année</label><input type="number" min="1990" max="2100" value="${esc(String(p.year||''))}" oninput="pxData[${i}].year=parseInt(this.value)||null"></div>
+        <div class="field"><label>Label</label><input value="${esc(p.label||'')}" placeholder="Prix de l'Initiative" oninput="pxData[${i}].label=this.value"></div>
+        <div class="field"><label>Mise en avant</label><select onchange="pxData[${i}].featured=this.value==='1'">
+          <option value="0"${!p.featured?' selected':''}>Archive (section du bas)</option>
+          <option value="1"${p.featured?' selected':''}>🏆 À l'honneur (section du haut)</option>
+        </select></div>
+      </div>
+      <div class="field"><label>Titre</label><input value="${esc(p.title||'')}" oninput="pxData[${i}].title=this.value"></div>
+      <div class="field"><label>Texte (HTML léger autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;)</label><textarea rows="5" oninput="pxData[${i}].body_html=this.value">${esc(p.body_html||'')}</textarea></div>`;
+    wrap.appendChild(d);
+  });
+}
+function addPrix() {
+  pxData.push({ id: 'prix-' + Date.now(), year: new Date().getFullYear(), label: 'Prix de l\'Initiative', title: '', body_html: '', featured: false });
+  renderPrix();
+}
+function rmPrix(i) {
+  if (!confirm('Supprimer ce prix ?')) return;
+  pxData.splice(i, 1); renderPrix();
+}
+async function savePrix() {
+  try {
+    await api('/admin/api/prix', { method: 'PUT', body: JSON.stringify(pxData) });
+    toast('✓ Prix enregistrés');
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== FORUM ADMIN =====
+let fmData = [], fmFilter = '';
+async function loadForum() {
+  fmData = await api('/admin/api/forum/threads');
+  $('#fm-count').textContent = fmData.length + ' fils au total';
+  renderForumAdmin();
+}
+function renderForumAdmin() {
+  const q = fmFilter.toLowerCase();
+  const list = q ? fmData.filter(t => (t.title+t.author_name).toLowerCase().includes(q)) : fmData;
+  const tb = $('#fm-tbody'); tb.innerHTML = '';
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Aucun fil</td></tr>'; return; }
+  list.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.cat_icon} ${esc(t.cat_name)}</td>
+      <td><a href="/forum/t/${t.id}" target="_blank">${esc(t.title)}</a></td>
+      <td style="font-size:.85rem;">${esc(t.author_name)}</td>
+      <td>${t.post_count}</td>
+      <td style="font-size:.8rem;color:var(--c-text-lt);">${new Date(t.last_post_at).toLocaleDateString('fr-FR')}</td>
+      <td style="text-align:right;"><button class="mini-btn danger" onclick="rmThread(${t.id})">🗑 Supprimer le fil</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+$('#fm-search').addEventListener('input', e => { fmFilter = e.target.value; renderForumAdmin(); });
+async function rmThread(id) {
+  if (!confirm('Supprimer ce fil et tous ses posts ?')) return;
+  try { await api('/admin/api/forum/threads/' + id, { method: 'DELETE' }); toast('✓ Supprimé'); loadForum(); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== MEMBRES =====
+let mbData = [], mbFilter = '', mbStage = null;
+async function loadMembers() {
+  mbData = await api('/admin/api/members');
+  $('#mb-count').textContent = mbData.length + ' membres enregistrés';
+  renderMembers();
+}
+function renderMembers() {
+  const q = mbFilter.toLowerCase();
+  const list = q ? mbData.filter(m => (m.email+m.firstName+m.lastName+(m.structure||'')).toLowerCase().includes(q)) : mbData;
+  const tb = $('#mb-tbody'); tb.innerHTML = '';
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Aucun membre</td></tr>'; return; }
+  list.forEach(m => {
+    const tr = document.createElement('tr');
+    const status = m.status === 'active' ? '<span style="color:#059669;">● actif</span>'
+      : m.status === 'pending' ? '<span style="color:#d97706;">◐ en attente activation</span>'
+      : '<span style="color:#991b1b;">○ révoqué</span>';
+    const last = m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleDateString('fr-FR') : '—';
+    tr.innerHTML = `<td>${esc(m.email)}</td>
+      <td>${esc((m.firstName||'')+' '+(m.lastName||''))}</td>
+      <td style="font-size:.8rem;color:var(--c-text-lt);">${esc(m.structure||'—')}</td>
+      <td>${status}</td>
+      <td style="font-size:.82rem;">${last}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        ${m.status === 'pending' ? `<button class="mini-btn" onclick="resendActivation('${m.id}')">✉ Renvoyer lien</button>` : ''}
+        <button class="mini-btn danger" onclick="rmMember('${m.id}')">✕</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+$('#mb-search').addEventListener('input', e => { mbFilter = e.target.value; renderMembers(); });
+
+$('#mb-file').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const toastOk = toast('📤 Analyse du fichier…');
+  try {
+    const buf = await file.arrayBuffer();
+    const res = await fetch('/admin/api/members/import/preview', {
+      method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: buf
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    renderDiff(data);
+  } catch (err) { toast('✗ ' + err.message, 'err'); }
+  e.target.value = '';
+});
+
+function renderDiff(data) {
+  mbStage = data;
+  $('#mb-diff-wrap').style.display = 'block';
+  $('#mb-sendmail-wrap').style.display = 'none';
+  $('#mb-diff-meta').textContent = `${data.totalRows} lignes lues · ${data.validRows} valides · ${data.toKeep} inchangés · ${data.errors.length} erreurs · colonnes détectées : email=« ${data.columns.email} », nom=« ${data.columns.lastName||'?'} », prénom=« ${data.columns.firstName||'?'} »`;
+  $('#mb-add-count').textContent = data.toAdd.length;
+  $('#mb-revoke-count').textContent = data.toRevoke.length;
+  const mkRow = p => `<div style="padding:.35rem .5rem;border-radius:6px;font-size:.85rem;">
+    <strong>${esc(p.email)}</strong> — ${esc(((p.firstName||'')+' '+(p.lastName||'')).trim()||'(sans nom)')}${p.structure?` · ${esc(p.structure)}`:''}</div>`;
+  $('#mb-add-list').innerHTML = data.toAdd.length ? data.toAdd.map(mkRow).join('') : '<div class="empty">Aucun nouveau</div>';
+  $('#mb-revoke-list').innerHTML = data.toRevoke.length ? data.toRevoke.map(mkRow).join('') : '<div class="empty">Aucun à révoquer</div>';
+  $('#mb-errors').innerHTML = data.errors.length ? `<div style="background:#fef2f2;border:1px solid #fca5a5;padding:.7rem .9rem;border-radius:var(--rad);font-size:.82rem;color:#991b1b;"><strong>⚠ ${data.errors.length} erreur(s) :</strong> ${data.errors.slice(0,5).map(e=>`ligne ${e.line}: ${e.error}`).join(' · ')}${data.errors.length>5?'…':''}</div>` : '';
+}
+
+async function applyImport() {
+  if (!mbStage) return;
+  if (!confirm(`Confirmer ?\n• ${mbStage.toAdd.length} ajouts\n• ${mbStage.toRevoke.length} révocations\n\nLes comptes révoqués ne pourront plus se connecter.`)) return;
+  try {
+    await api('/admin/api/members/import/apply', {
+      method: 'POST', body: JSON.stringify({ stageId: mbStage.stageId })
+    });
+    $('#mb-diff-wrap').style.display = 'none';
+    $('#mb-sendmail-wrap').style.display = 'block';
+    toast('✓ Changements appliqués');
+    loadMembers();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function sendEmails() {
+  if (!mbStage) return;
+  try {
+    const out = await api('/admin/api/members/import/send-emails', {
+      method: 'POST', body: JSON.stringify({ stageId: mbStage.stageId })
+    });
+    toast(`✉ ${out.activation.length} emails d'activation · ${out.revocation.length} de désabonnement`);
+    $('#mb-sendmail-wrap').style.display = 'none';
+    mbStage = null;
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+function cancelImport() {
+  $('#mb-diff-wrap').style.display = 'none';
+  $('#mb-sendmail-wrap').style.display = 'none';
+  mbStage = null;
+}
+async function resendActivation(id) {
+  try { await api(`/admin/api/members/${id}/resend-activation`, { method: 'POST' }); toast('✓ Lien renvoyé'); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function rmMember(id) {
+  if (!confirm('Supprimer définitivement ce membre ?')) return;
+  try { await api(`/admin/api/members/${id}`, { method: 'DELETE' }); toast('✓ Supprimé'); loadMembers(); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== PROMPT IA =====
+let promptCurrent = '', promptDefault = '';
+async function loadPrompt() {
+  const d = await api('/admin/api/prompt');
+  promptCurrent = d.current || ''; promptDefault = d.default || '';
+  $('#p-prompt').value = promptCurrent;
+  $('#p-restore-backup').disabled = !d.hasBackup;
+  updatePromptStats();
+  const diff = promptCurrent.trim() === promptDefault.trim();
+  $('#p-status').textContent = diff ? '✓ identique à la version d\'origine' : '✎ modifié par rapport à la version d\'origine';
+}
+function updatePromptStats() {
+  const v = $('#p-prompt').value || '';
+  $('#p-chars').textContent = v.length.toLocaleString('fr-FR');
+  $('#p-tokens').textContent = Math.ceil(v.length / 4).toLocaleString('fr-FR');
+}
+document.addEventListener('input', e => {
+  if (e.target && e.target.id === 'p-prompt') updatePromptStats();
+});
+async function savePrompt() {
+  const v = $('#p-prompt').value.trim();
+  if (!v) return toast('Le prompt ne peut pas être vide', 'err');
+  if (v.length > 50000) return toast('Prompt trop long (> 50 000 caractères)', 'err');
+  if (!confirm('Enregistrer ce prompt ? La version actuelle sera conservée en sauvegarde.')) return;
+  try {
+    await api('/admin/api/prompt', { method: 'PUT', body: JSON.stringify({ prompt: v }) });
+    toast('✓ Prompt enregistré');
+    loadPrompt();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function restorePromptBackup() {
+  if (!confirm('Restaurer la version précédente du prompt ?\n\n(La version actuelle sera à son tour conservée en sauvegarde — vous pourrez faire l\'inverse.)')) return;
+  try {
+    await api('/admin/api/prompt/restore-backup', { method: 'POST' });
+    toast('✓ Version précédente restaurée');
+    loadPrompt();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function restorePromptDefault() {
+  if (!confirm('⚠️ Restaurer le prompt D\'ORIGINE ?\n\nTous vos ajustements seront remplacés par la version initiale du site. La version actuelle sera tout de même conservée en sauvegarde.')) return;
+  try {
+    await api('/admin/api/prompt/restore-default', { method: 'POST' });
+    toast('✓ Prompt d\'origine restauré');
+    loadPrompt();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+let heroData = {};
+async function loadHero() {
+  heroData = await api('/admin/api/hero');
+  $('#h-label').value = heroData.label || '';
+  $('#h-title').value = heroData.title || '';
+  $('#h-location').value = heroData.location || '';
+  renderSpeakers();
+}
+function renderSpeakers() {
+  const wrap = $('#h-speakers'); wrap.innerHTML = '';
+  (heroData.speakers || []).forEach((s, i) => {
+    const d = document.createElement('div'); d.className = 'sub-item';
+    d.innerHTML = `<button class="rm" onclick="rmSpeaker(${i})">✕</button>
+      <div class="row"><div class="field"><label>Nom</label><input value="${esc(s.name||'')}" oninput="heroData.speakers[${i}].name=this.value"></div>
+      <div class="field"><label>Sujet</label><input value="${esc(s.topic||'')}" oninput="heroData.speakers[${i}].topic=this.value"></div></div>`;
+    wrap.appendChild(d);
+  });
+}
+function addSpeaker() { heroData.speakers = heroData.speakers || []; heroData.speakers.push({ name:'', topic:'' }); renderSpeakers(); }
+function rmSpeaker(i) { heroData.speakers.splice(i, 1); renderSpeakers(); }
+async function saveHero() {
+  heroData.label = $('#h-label').value;
+  heroData.title = $('#h-title').value;
+  heroData.location = $('#h-location').value;
+  try { await api('/admin/api/hero', { method: 'PUT', body: JSON.stringify(heroData) }); toast('✓ Vignette enregistrée'); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== ACTUS =====
+let actusData = { main: {}, sidebar: [] };
+async function loadActus() {
+  actusData = await api('/admin/api/actualites');
+  actusData.main = actusData.main || {};
+  actusData.sidebar = actusData.sidebar || [];
+  $('#a-main-label').value = actusData.main.label || '';
+  $('#a-main-title').value = actusData.main.title || '';
+  $('#a-main-image').value = actusData.main.image || '';
+  $('#a-main-body').value = actusData.main.body_html || '';
+  $('#a-main-cta-text').value = actusData.main.cta_text || '';
+  $('#a-main-cta-href').value = actusData.main.cta_href || '';
+  renderSide();
+}
+function renderSide() {
+  const wrap = $('#a-sidebar'); wrap.innerHTML = '';
+  actusData.sidebar.forEach((s, i) => {
+    const d = document.createElement('div'); d.className = 'sub-item';
+    d.innerHTML = `<button class="rm" onclick="rmSide(${i})">✕</button>
+      <div class="row"><div class="field"><label>Label</label><input value="${esc(s.label||'')}" oninput="actusData.sidebar[${i}].label=this.value"></div>
+      <div class="field"><label>Titre</label><input value="${esc(s.title||'')}" oninput="actusData.sidebar[${i}].title=this.value"></div></div>
+      <div class="field"><label>Texte (HTML léger)</label><textarea rows="3" oninput="actusData.sidebar[${i}].body_html=this.value">${esc(s.body_html||'')}</textarea></div>
+      <div class="row-3"><div class="field"><label>Texte bouton</label><input value="${esc(s.cta_text||'')}" oninput="actusData.sidebar[${i}].cta_text=this.value"></div>
+      <div class="field"><label>Lien (# pour chat IA)</label><input value="${esc(s.cta_href||'')}" oninput="actusData.sidebar[${i}].cta_href=this.value"></div>
+      <div class="field"><label>Style</label><select onchange="actusData.sidebar[${i}].cta_style=this.value">
+        <option value="btn-blue"${s.cta_style==='btn-blue'?' selected':''}>Bleu</option>
+        <option value="btn-ai"${s.cta_style==='btn-ai'?' selected':''}>Violet (IA)</option>
+        <option value="btn-ghost"${s.cta_style==='btn-ghost'?' selected':''}>Neutre</option>
+        <option value="btn-primary"${s.cta_style==='btn-primary'?' selected':''}>Accent</option>
+      </select></div></div>`;
+    wrap.appendChild(d);
+  });
+}
+function addSideItem() { actusData.sidebar.push({ label:'', title:'', body_html:'', cta_text:'', cta_href:'', cta_style:'btn-blue' }); renderSide(); }
+function rmSide(i) { actusData.sidebar.splice(i, 1); renderSide(); }
+async function saveActus() {
+  actusData.main = {
+    label: $('#a-main-label').value, title: $('#a-main-title').value,
+    image: $('#a-main-image').value, body_html: $('#a-main-body').value,
+    cta_text: $('#a-main-cta-text').value, cta_href: $('#a-main-cta-href').value
+  };
+  try { await api('/admin/api/actualites', { method: 'PUT', body: JSON.stringify(actusData) }); toast('✓ Actualités enregistrées'); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== CONGRÈS =====
+let congresData = { year:2025, theme:'', dates:'', interventions:[] };
+async function loadCongres() {
+  congresData = await api('/admin/api/congres');
+  congresData.interventions = congresData.interventions || [];
+  $('#c-year').value = congresData.year || '';
+  $('#c-dates').value = congresData.dates || '';
+  $('#c-theme').value = congresData.theme || '';
+  renderInterventions();
+}
+function renderInterventions() {
+  const wrap = $('#c-interventions'); wrap.innerHTML = '';
+  congresData.interventions.forEach((it, i) => {
+    const d = document.createElement('div'); d.className = 'sub-item';
+    d.innerHTML = `<button class="rm" onclick="rmIntervention(${i})">✕</button>
+      <div class="row"><div class="field"><label>Intervenant</label><input value="${esc(it.speaker||'')}" oninput="congresData.interventions[${i}].speaker=this.value"></div>
+      <div class="field"><label>Affiliation</label><input value="${esc(it.affiliation||'')}" oninput="congresData.interventions[${i}].affiliation=this.value"></div></div>
+      <div class="field"><label>Titre de l'intervention</label><input value="${esc(it.title||'')}" oninput="congresData.interventions[${i}].title=this.value"></div>`;
+    wrap.appendChild(d);
+  });
+}
+function addIntervention() { congresData.interventions.push({ speaker:'', affiliation:'', title:'' }); renderInterventions(); }
+function rmIntervention(i) { congresData.interventions.splice(i, 1); renderInterventions(); }
+async function saveCongres() {
+  congresData.year = parseInt($('#c-year').value) || null;
+  congresData.dates = $('#c-dates').value;
+  congresData.theme = $('#c-theme').value;
+  try { await api('/admin/api/congres', { method: 'PUT', body: JSON.stringify(congresData) }); toast('✓ Congrès enregistré'); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== BULLETINS =====
+let bulData = [];
+async function loadBulletins() {
+  bulData = await api('/admin/api/bulletins');
+  const tb = $('#b-tbody'); tb.innerHTML = '';
+  bulData.sort((a,b) => b.year - a.year).forEach((b, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${b.year}</strong></td>
+      <td><input value="${esc(b.theme||'')}" style="width:100%;padding:.4rem .6rem;border:1px solid var(--c-border);border-radius:6px;font-size:.85rem;" oninput="bulData[${i}].theme=this.value"></td>
+      <td style="text-align:right;white-space:nowrap;">
+        <a class="mini-btn" href="/assets/pdfs/bulletin-${b.year}.pdf" target="_blank">👁 PDF</a>
+        <button class="mini-btn" onclick="saveBulTheme(${b.year})">💾</button>
+        <button class="mini-btn danger" onclick="rmBulletin(${b.year})">✕</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+async function saveBulTheme(year) {
+  try { await api('/admin/api/bulletins', { method: 'PUT', body: JSON.stringify(bulData) }); toast(`✓ Bulletin ${year} enregistré`); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function rmBulletin(year) {
+  if (!confirm(`Supprimer le bulletin ${year} ?`)) return;
+  try { await api('/admin/api/bulletins/' + year, { method: 'DELETE' }); toast('✓ Supprimé'); loadBulletins(); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+function openAddBulletin() {
+  $('#dlg-bul-title').textContent = 'Nouveau bulletin';
+  $('#dlg-bul-year').value = new Date().getFullYear();
+  $('#dlg-bul-theme').value = '';
+  $('#dlg-bul-file').value = '';
+  $('#dlg-bul').classList.add('show');
+}
+async function saveBulletin() {
+  const year = parseInt($('#dlg-bul-year').value);
+  const theme = $('#dlg-bul-theme').value;
+  const file = $('#dlg-bul-file').files[0];
+  if (!year || !theme) return toast('Année + thème requis', 'err');
+  try {
+    if (file) {
+      const buf = await file.arrayBuffer();
+      const up = await fetch(`/admin/api/bulletins/upload/${year}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/pdf' }, body: buf
+      });
+      if (!up.ok) throw new Error((await up.json()).error || 'upload échoué');
+    }
+    const list = bulData.filter(b => b.year !== year);
+    list.push({ year, file: `bulletin-${year}.pdf`, theme });
+    await api('/admin/api/bulletins', { method: 'PUT', body: JSON.stringify(list) });
+    toast('✓ Bulletin enregistré');
+    closeDlg('dlg-bul'); loadBulletins();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+// ===== ARTICLES =====
+let artData = [], artFilter = '';
+async function loadArticles() {
+  artData = await api('/admin/api/articles');
+  $('#art-count').textContent = artData.length + ' articles au total';
+  renderArt();
+}
+function renderArt() {
+  const q = artFilter.toLowerCase();
+  const tb = $('#art-tbody'); tb.innerHTML = '';
+  const list = q ? artData.filter(a => (a.title+a.theme).toLowerCase().includes(q)) : artData;
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Aucun article</td></tr>'; return; }
+  list.slice(0, 200).forEach(a => {
+    const tr = document.createElement('tr');
+    const fmt = a.pdfFile ? '📄 PDF' : '📝 Texte';
+    tr.innerHTML = `<td>${a.id}</td><td><a href="/article/${a.id}" target="_blank">${esc(a.title||'')}</a></td>
+      <td style="font-size:.8rem;color:var(--c-text-lt);">${esc(a.theme||'')}</td>
+      <td>${a.year||'—'}</td><td>${fmt}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="mini-btn" onclick="editArticle(${a.id})">✏️</button>
+        <button class="mini-btn danger" onclick="rmArticle(${a.id})">✕</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+$('#art-search').addEventListener('input', e => { artFilter = e.target.value; renderArt(); });
+
+let artEditingId = null, artEditingPdf = null;
+function openAddArticle() {
+  artEditingId = null; artEditingPdf = null;
+  $('#dlg-art-title').textContent = 'Nouvel article';
+  $('#dlg-art-title-in').value = ''; $('#dlg-art-theme').value = '';
+  $('#dlg-art-year').value = new Date().getFullYear(); $('#dlg-art-content').value = '';
+  $('#dlg-art-pdf').value = '';
+  $('#dlg-art-pdf-current').style.display = 'none';
+  $('#dlg-art').classList.add('show');
+}
+async function editArticle(id) {
+  const a = artData.find(x => x.id === id);
+  artEditingId = id; artEditingPdf = a.pdfFile || null;
+  $('#dlg-art-title').textContent = `Éditer article #${id}`;
+  $('#dlg-art-title-in').value = a.title || '';
+  $('#dlg-art-theme').value = a.theme || '';
+  $('#dlg-art-year').value = a.year || '';
+  $('#dlg-art-pdf').value = '';
+  const full = await api('/admin/api/articles').then(l => l.find(x => x.id === id));
+  $('#dlg-art-content').value = full?.excerpt || '';
+  const cur = $('#dlg-art-pdf-current');
+  if (artEditingPdf) {
+    cur.style.display = 'block';
+    const link = $('#dlg-art-pdf-link');
+    link.href = '/assets/pdfs/articles/' + artEditingPdf;
+    link.textContent = artEditingPdf;
+  } else {
+    cur.style.display = 'none';
+  }
+  $('#dlg-art').classList.add('show');
+}
+async function uploadArticlePdf(id, file) {
+  const buf = await file.arrayBuffer();
+  const res = await fetch(`/admin/api/articles/${id}/pdf`, {
+    method: 'POST', headers: { 'Content-Type': 'application/pdf' }, body: buf
+  });
+  if (!res.ok) throw new Error((await res.json()).error || 'upload PDF échoué');
+}
+async function removeArticlePdf() {
+  if (!artEditingId) return;
+  if (!confirm('Retirer le PDF de cet article ? (le contenu texte sera utilisé à la place)')) return;
+  try {
+    await api(`/admin/api/articles/${artEditingId}/pdf`, { method: 'DELETE' });
+    artEditingPdf = null;
+    $('#dlg-art-pdf-current').style.display = 'none';
+    toast('✓ PDF retiré');
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function saveArticle() {
+  const body = {
+    title: $('#dlg-art-title-in').value,
+    theme: $('#dlg-art-theme').value,
+    year: $('#dlg-art-year').value || null,
+    content: $('#dlg-art-content').value
+  };
+  if (!body.title) return toast('Titre requis', 'err');
+  const pdfFile = $('#dlg-art-pdf').files[0];
+  try {
+    let id = artEditingId;
+    if (artEditingId) {
+      await api('/admin/api/articles/' + artEditingId, { method: 'PUT', body: JSON.stringify(body) });
+    } else {
+      const out = await api('/admin/api/articles', { method: 'POST', body: JSON.stringify(body) });
+      id = out.id;
+    }
+    if (pdfFile) {
+      await uploadArticlePdf(id, pdfFile);
+      toast(artEditingId ? '✓ Article et PDF mis à jour' : '✓ Article créé avec PDF');
+    } else {
+      toast(artEditingId ? '✓ Article mis à jour' : '✓ Article créé');
+    }
+    closeDlg('dlg-art'); loadArticles();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function rmArticle(id) {
+  if (!confirm(`Supprimer l'article #${id} ?`)) return;
+  try { await api('/admin/api/articles/' + id, { method: 'DELETE' }); toast('✓ Supprimé'); loadArticles(); }
+  catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function closeDlg(id){$('#'+id).classList.remove('show');}
+
+// Initial load
+loadHero();
+</script>
+</body>
+</html>

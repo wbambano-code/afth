@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace membres — AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+  <style>
+    body{background:linear-gradient(155deg,#06131e 0%,#0f3d50 45%,#1a5f7a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .auth-card{background:#fff;border-radius:var(--rad-lg);padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:420px;width:100%}
+    .auth-card h1{font-size:1.4rem;margin-bottom:.3rem}
+    .auth-sub{color:var(--c-text-lt);font-size:.88rem;margin-bottom:1.75rem}
+    .auth-card .field{margin-bottom:1rem}
+    .auth-card input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.95rem;outline:none;transition:var(--tr)}
+    .auth-card input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .auth-card .btn{width:100%;justify-content:center}
+    .err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:.7rem .9rem;border-radius:var(--rad);font-size:.85rem;margin-bottom:1rem;display:none}
+    .err.show{display:block}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:.7rem .9rem;border-radius:var(--rad);font-size:.85rem;margin-bottom:1rem;display:none}
+    .ok.show{display:block}
+    .alt-link{text-align:center;margin-top:1.1rem;font-size:.85rem;color:var(--c-text-lt)}
+    .back{text-align:center;margin-top:.5rem;font-size:.82rem}
+    .field-label{display:block;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-lt);margin-bottom:.3rem}
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <h1>🌊 Espace membres AFTh</h1>
+    <p class="auth-sub">Accès réservé aux adhérents à jour de cotisation.</p>
+    <div class="err" id="err"></div>
+    <form id="login-form">
+      <div class="field"><label class="field-label">Email</label><input type="email" id="email" placeholder="vous@votre-structure.fr" autofocus required></div>
+      <div class="field"><label class="field-label">Mot de passe</label><input type="password" id="password" required></div>
+      <button type="submit" class="btn btn-blue">Se connecter</button>
+    </form>
+    <div class="alt-link">
+      <a href="/membres/mot-de-passe-oublie">Mot de passe oublié ?</a>
+    </div>
+    <div class="back"><a href="/">← Retour au site</a></div>
+  </div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const err = document.getElementById('err'); err.classList.remove('show');
+  try {
+    const res = await fetch('/membres/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    location.href = '/membres/profil';
+  } catch (e) {
+    err.textContent = '⚠ ' + e.message;
+    err.classList.add('show');
+  }
+});
+</script>
+</body>
+</html>

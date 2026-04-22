@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace membre — AFTh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+  <style>
+    .member-wrap{max-width:820px;margin:0 auto;padding:0 1.5rem}
+    .member-card{background:#fff;border-radius:var(--rad-lg);padding:1.75rem;box-shadow:var(--sh-sm);margin-bottom:1.2rem;border:1px solid var(--c-border)}
+    .welcome{background:linear-gradient(135deg,var(--c-primary-dk),var(--c-primary));color:#fff;border-radius:var(--rad-lg);padding:1.75rem 2rem;margin-bottom:1.5rem}
+    .welcome h2{color:#fff;margin:0}
+    .welcome p{color:rgba(255,255,255,.75);margin:.4rem 0 0;font-size:.9rem}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .info-item{background:var(--c-bg-alt);padding:.9rem 1.1rem;border-radius:var(--rad);border:1px solid var(--c-border)}
+    .info-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-lt);margin-bottom:.25rem}
+    .info-value{font-weight:600}
+    .section-title{font-family:var(--font-h);font-size:1.1rem;margin-bottom:1rem}
+    .field{margin-bottom:.9rem}
+    .field label{display:block;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-lt);margin-bottom:.3rem}
+    .field input{width:100%;padding:.65rem .9rem;border:1.5px solid var(--c-border);border-radius:var(--rad);font-family:var(--font-b);font-size:.9rem;outline:none;transition:var(--tr)}
+    .field input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(26,95,122,.1)}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--c-primary-dk);color:#fff;padding:.8rem 1.2rem;border-radius:var(--rad);font-size:.88rem;box-shadow:var(--sh-md);opacity:0;pointer-events:none;transition:var(--tr);z-index:1000}
+    .toast.show{opacity:1}
+    .toast.ok{background:#059669}
+    .toast.err{background:#991b1b}
+    .coming-soon{background:linear-gradient(135deg,var(--c-ai-lt),#fff);border:1px dashed var(--c-ai);padding:1.4rem;border-radius:var(--rad-lg);text-align:center;margin-bottom:1.2rem;color:var(--c-ai)}
+    @media (max-width:768px){.two-col{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img class="nav-logo" src="/assets/images/logo.gif" alt="AFTh" onerror="this.style.display='none'">
+      <div><span class="nav-name">AFTh</span><span class="nav-sub">Espace membre</span></div>
+    </a>
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="/">Site public</a></li>
+        <li><a href="/archives">Archives</a></li>
+        <li><a href="/articles">Articles</a></li>
+        <li><a href="#" onclick="logout();return false;">↪ Déconnexion</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section style="padding:calc(var(--nav-h) + 2rem) 0 3rem;background:var(--c-bg-alt);min-height:80vh;">
+  <div class="member-wrap">
+
+    <div class="welcome">
+      <h2>Bonjour {{FIRST_NAME}}</h2>
+      <p>Bienvenue dans votre espace membre AFTh. Dernière connexion : <strong>{{LAST_LOGIN}}</strong></p>
+    </div>
+
+    <div class="member-card">
+      <h3 class="section-title">Votre profil</h3>
+      <div class="info-grid" style="margin-bottom:1.2rem;">
+        <div class="info-item"><div class="info-label">Email</div><div class="info-value">{{EMAIL}}</div></div>
+        <div class="info-item"><div class="info-label">Membre depuis</div><div class="info-value">{{MEMBER_SINCE}}</div></div>
+      </div>
+      <form id="profile-form" onsubmit="event.preventDefault();saveProfile()">
+        <div class="two-col">
+          <div class="field"><label>Prénom</label><input id="firstName" value="{{FIRST_NAME}}"></div>
+          <div class="field"><label>Nom</label><input id="lastName" value="{{LAST_NAME}}"></div>
+        </div>
+        <div class="field"><label>Structure / établissement</label><input id="structure" value="{{STRUCTURE}}" placeholder="Thermes, BET, fournisseur…"></div>
+        <button type="submit" class="btn btn-blue btn-sm">💾 Enregistrer le profil</button>
+      </form>
+    </div>
+
+    <div class="member-card">
+      <h3 class="section-title">Changer le mot de passe</h3>
+      <form id="pw-form" onsubmit="event.preventDefault();savePassword()">
+        <div class="field"><label>Mot de passe actuel</label><input type="password" id="currentPassword" required></div>
+        <div class="two-col">
+          <div class="field"><label>Nouveau mot de passe</label><input type="password" id="newPassword" minlength="8" required></div>
+          <div class="field"><label>Confirmation</label><input type="password" id="newPassword2" minlength="8" required></div>
+        </div>
+        <button type="submit" class="btn btn-blue btn-sm">🔒 Mettre à jour le mot de passe</button>
+      </form>
+    </div>
+
+    <a href="/forum" style="display:block;text-decoration:none;">
+      <div class="coming-soon" style="transition:all .2s;cursor:pointer;">
+        <strong>💬 Forum de discussion — accès direct</strong><br>
+        <span style="font-size:.88rem;">Échangez avec les autres adhérents dans nos 5 catégories thématiques.</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+async function logout() {
+  await fetch('/membres/logout', { method: 'POST' });
+  location.href = '/membres/login';
+}
+async function saveProfile() {
+  const body = {
+    firstName: document.getElementById('firstName').value,
+    lastName: document.getElementById('lastName').value,
+    structure: document.getElementById('structure').value
+  };
+  try {
+    const res = await fetch('/api/me', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error((await res.json()).error);
+    toast('✓ Profil mis à jour');
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+async function savePassword() {
+  const cur = document.getElementById('currentPassword').value;
+  const np = document.getElementById('newPassword').value;
+  const np2 = document.getElementById('newPassword2').value;
+  if (np !== np2) return toast('Les mots de passe ne correspondent pas', 'err');
+  try {
+    const res = await fetch('/api/me', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: cur, newPassword: np }) });
+    if (!res.ok) throw new Error((await res.json()).error);
+    toast('✓ Mot de passe modifié');
+    document.getElementById('pw-form').reset();
+  } catch (e) { toast('✗ ' + e.message, 'err'); }
+}
+</script>
+</body>
+</html>

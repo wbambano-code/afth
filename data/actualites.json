@@ -1,0 +1,39 @@
+{
+  "main": {
+    "label": "Prix d'Honneur · 2025",
+    "title": "Prix d'Honneur Jean-François Béraud",
+    "image": "/assets/images/beraud.jpg",
+    "body_html": "<p>Jean-François Béraud, président de la <strong>Fédération Thermale et Climatique Française (FTCF)</strong>, met fin à ses activités thermales à La Bourboule après des décennies au service du thermalisme français.</p>\n<p>Fondateur du <strong>Laboratoire Thermauvergne</strong>, pilier de l'<strong>Observatoire du thermalisme</strong>, artisan de la <strong>Route des villes d'eaux</strong> et moteur des <strong>clusters thermaux</strong>, il a incarné pendant toute une génération la défense et la modernisation technique du thermalisme.</p>\n<p>Pour la première fois de son histoire, l'AFTh lui décerne un <strong>Prix d'Honneur</strong>, en reconnaissance de son engagement sans faille pour les techniques hydrothermales.</p>",
+    "cta_text": "Voir le Prix complet →",
+    "cta_href": "/prix"
+  },
+  "sidebar": [
+    {
+      "id": "bérot-2025",
+      "label": "Hommage",
+      "title": "Jean-Louis Bérot (1946-2025)",
+      "body_html": "Figure du thermalisme dacquois, ancien international de rugby, défenseur du thermalisme médical et promoteur infatigable de la qualité et de la certification dans les établissements. Décédé fin 2025.",
+      "cta_text": "",
+      "cta_href": "",
+      "cta_style": ""
+    },
+    {
+      "id": "bulletin-2025",
+      "label": "Publication",
+      "title": "Bulletin 2025 disponible",
+      "body_html": "« Gestion de la radioactivité dans les établissements thermaux » — 8 interventions d'experts, 60 pages techniques.",
+      "cta_text": "📄 Télécharger",
+      "cta_href": "/assets/pdfs/bulletin-2025.pdf",
+      "cta_style": "btn-blue"
+    },
+    {
+      "id": "ia",
+      "label": "Nouveau",
+      "title": "Assistant IA AFTh",
+      "body_html": "Interrogez 20 ans d'archives techniques directement avec notre assistant IA propulsé par Claude.",
+      "cta_text": "🤖 Essayer",
+      "cta_href": "#open-ia",
+      "cta_style": "btn-ai"
+    }
+  ]
+}
