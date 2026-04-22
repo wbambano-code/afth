@@ -1,7 +1,5 @@
 node_modules/
 .env
-data/articles.json
-data/bulletins-index.json
 data/system-prompt.backup.txt
 data/members.json
 data/forum.db
