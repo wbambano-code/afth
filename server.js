@@ -221,6 +221,9 @@ function renderArticle(a) {
         </object>
       </div>
       <div style="text-align:center;margin-top:.8rem;"><a href="${pdfPath}" target="_blank" rel="noopener" class="btn btn-blue btn-sm">⬇ Télécharger le PDF</a></div>`;
+  } else if (a.content_html && a.content_html.trim()) {
+    // Le HTML a été sanitizé côté scraper avec une whitelist stricte (XSS-safe)
+    body = a.content_html;
   } else {
     let paras = rawContent.split(/\n+/).map(p => p.trim()).filter(Boolean);
     if (paras.length === 1 && paras[0].length > 600) {

@@ -17,6 +17,7 @@ Site refondu de l'AFTh, association professionnelle française du thermalisme te
 - **Anthropic SDK** — chat IA streaming SSE
 - **bcryptjs** — hash mots de passe membres
 - **xlsx / nodemailer** — import adhérents + envoi d'emails
+- **sanitize-html** — nettoyage XSS-safe du HTML scrapé depuis afth.asso.fr
 - **Frontend** : HTML/CSS/JS vanilla, **zéro framework**, polices Inter + Source Serif 4
 
 ## 📂 Arborescence
@@ -51,6 +52,8 @@ Site refondu de l'AFTh, association professionnelle française du thermalisme te
 │   ├── images/
 │   │   ├── InstallThermale.jpg  ← photo hero de la home
 │   │   ├── beraud.jpg           ← photo Prix d'Honneur 2025
+│   │   ├── articles/            ← images extraites des articles (base64 décodées + HTTP)
+│   │   │   └── article-{id}-{n}.{jpg,png}  (14 fichiers actuels)
 │   │   ├── logo.gif, logo_cneth.png, afreth.gif, etc.
 │   └── pdfs/
 │       ├── bulletin-2004.pdf ... bulletin-2025.pdf  (22 fichiers)

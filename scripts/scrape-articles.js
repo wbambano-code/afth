@@ -1,9 +1,15 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
-import { writeFileSync, mkdirSync } from 'fs';
+import sanitizeHtml from 'sanitize-html';
+import { writeFileSync, mkdirSync, existsSync, statSync, unlinkSync, createWriteStream } from 'fs';
+import { Buffer } from 'buffer';
+import { pipeline } from 'stream/promises';
+import { URL } from 'url';
+import { extname } from 'path';
 
 const BASE = 'https://afth.asso.fr';
 const DELAY = 1200;
+const IMG_DIR = 'assets/images/articles';
 
 const IDS = [
   39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
@@ -30,16 +36,132 @@ const THEMES = {
 };
 
 const DIACRITICS = new RegExp('[̀-ͯ]', 'g');
-
-function norm(s) {
-  return (s||'').toLowerCase().normalize('NFD').replace(DIACRITICS,'');
-}
+function norm(s) { return (s||'').toLowerCase().normalize('NFD').replace(DIACRITICS,''); }
 function detectTheme(title, url) {
   const text = norm(title + ' ' + url);
   for (const [k,v] of Object.entries(THEMES)) if (text.includes(k)) return v;
   return 'Technique thermale';
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Règles de sanitize-html : on garde la structure sémantique + images + liens
+const SANITIZE_OPTS = {
+  allowedTags: ['p','br','h2','h3','h4','h5','h6','strong','b','em','i','u','ul','ol','li',
+                'blockquote','a','img','table','thead','tbody','tr','th','td','figure','figcaption','hr'],
+  allowedAttributes: {
+    a: ['href', 'title'],
+    img: ['src', 'alt', 'title', 'width', 'height'],
+    table: ['border'],
+    td: ['colspan','rowspan'],
+    th: ['colspan','rowspan','scope'],
+  },
+  allowedSchemes: ['http','https','mailto'],
+  transformTags: {
+    // Vire les liens "javascript:" etc, force target/rel pour les externes
+    a: (tagName, attribs) => ({
+      tagName: 'a',
+      attribs: {
+        ...attribs,
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      }
+    })
+  },
+  allowedSchemesAppliedToAttributes: ['href','src'],
+  // Pas de exclusiveFilter — on nettoie les <p> vides en post-traitement
+  // (avec une regex qui ne touche PAS les <p> contenant des médias)
+};
+
+function extToGuess(contentType) {
+  if (!contentType) return '.bin';
+  const ct = contentType.toLowerCase();
+  if (ct.includes('jpeg') || ct.includes('jpg')) return '.jpg';
+  if (ct.includes('png')) return '.png';
+  if (ct.includes('gif')) return '.gif';
+  if (ct.includes('webp')) return '.webp';
+  if (ct.includes('svg')) return '.svg';
+  return '.bin';
+}
+
+async function downloadImage(imgUrl, articleId, index) {
+  try {
+    // Cas 1 : data URL en base64 → décoder et sauvegarder
+    if (imgUrl.startsWith('data:')) {
+      const m = imgUrl.match(/^data:([^;]+);base64,(.+)$/);
+      if (!m) return null;
+      const mime = m[1];
+      const base64 = m[2];
+      const ext = extToGuess(mime);
+      const filename = `article-${articleId}-${index}${ext}`;
+      const filepath = `${IMG_DIR}/${filename}`;
+      const buf = Buffer.from(base64, 'base64');
+      if (buf.length < 500) return null; // ignore les data URLs minuscules
+      writeFileSync(filepath, buf);
+      return `/${filepath}`;
+    }
+    // Cas 2 : URL classique http(s)
+    let ext = extname(new URL(imgUrl).pathname).toLowerCase();
+    if (!['.jpg','.jpeg','.png','.gif','.webp','.svg'].includes(ext)) ext = '';
+    const filename = `article-${articleId}-${index}${ext || '.bin'}`;
+    const filepath = `${IMG_DIR}/${filename}`;
+    if (existsSync(filepath) && statSync(filepath).size > 500) {
+      return `/${filepath}`;
+    }
+    const res = await fetch(imgUrl, { signal: AbortSignal.timeout(15000), headers:{'User-Agent':'AFTh-Refonte/1.0'} });
+    if (!res.ok) return null;
+    if (!ext) {
+      const realExt = extToGuess(res.headers.get('content-type'));
+      const newPath = `${IMG_DIR}/article-${articleId}-${index}${realExt}`;
+      await pipeline(res.body, createWriteStream(newPath));
+      return `/${newPath}`;
+    }
+    await pipeline(res.body, createWriteStream(filepath));
+    return `/${filepath}`;
+  } catch (e) {
+    process.stdout.write(` (img ✗ ${e.message.substring(0,30)})`);
+    return null;
+  }
+}
+
+const MIN_IMG_SIZE = 1500; // octets : filtre les icônes/bullets < 1.5 Ko
+
+async function processImages($, $el, articleId, baseUrl) {
+  const imgs = $el.find('img').toArray();
+  let idx = 0, kept = 0;
+  for (const img of imgs) {
+    idx++;
+    const src = img.attribs?.src;
+    if (!src) continue;
+    let absUrl = src;
+    if (!src.startsWith('data:')) {
+      try { absUrl = new URL(src, baseUrl).href; } catch { continue; }
+    }
+    const localPath = await downloadImage(absUrl, articleId, idx);
+
+    let tooSmall = false;
+    if (localPath) {
+      try {
+        const sz = statSync(localPath.replace(/^\//, '')).size;
+        if (sz < MIN_IMG_SIZE) tooSmall = true;
+      } catch {}
+    }
+
+    if (localPath && !tooSmall) {
+      img.attribs.src = localPath;
+      if (!img.attribs.alt) img.attribs.alt = '';
+      delete img.attribs.width;
+      delete img.attribs.height;
+      delete img.attribs.style;
+      kept++;
+    } else {
+      // Suppression sûre via cheerio (l'API officielle)
+      $(img).remove();
+      // Nettoie aussi le fichier si on l'avait téléchargé (pour éviter l'accumulation d'icônes orphelines)
+      if (localPath) try { unlinkSync(localPath.replace(/^\//, '')); } catch {}
+    }
+  }
+  return kept;
+}
 
 async function scrape(id) {
   const url = `${BASE}/index.php/liste-des-articles-archives/11-archives/${id}`;
@@ -51,40 +173,78 @@ async function scrape(id) {
     if (!res.ok) { process.stdout.write(` ✗ ${res.status}\n`); return null; }
     const html = await res.text();
     const $ = cheerio.load(html);
-    $('nav,header,footer,script,style').remove();
+    $('nav,header,footer,script,style,noscript,iframe,form').remove();
     const title = $('h1,h2,.contentheading').first().text().trim()
       || $('title').text().replace(/[-|].*$/,'').trim();
-    let content = '';
+
+    // Trouve la zone article principale
+    let $article = null;
     for (const sel of ['div.item-page','article','div#content','div.article-content']) {
       const el = $(sel);
-      if (el.length) { content = el.text().trim(); break; }
+      if (el.length) { $article = el.first(); break; }
     }
-    if (!content) content = $('body').text().replace(/\s+/g,' ').trim();
-    content = content.replace(/\s{3,}/g,'\n\n').substring(0,10000);
-    if (!title && !content) return null;
-    const ym = content.match(/\b(200[4-9]|201[0-9]|202[0-5])\b/);
+    if (!$article) return null;
+
+    // Retire le titre interne (déjà en h1 du rendu) et les méta
+    $article.find('h1,h2.contentheading,.article-info,.item-title,.contentpaneopen').first().remove();
+
+    // Télécharge les images et réécrit les src
+    const imgCount = await processImages($, $article, id, res.url);
+
+    // HTML brut puis sanitize, puis nettoyage léger des <p> totalement vides
+    const rawHtml = $article.html() || '';
+    let cleanHtml = sanitizeHtml(rawHtml, SANITIZE_OPTS);
+    // Retire les <p> qui ne contiennent ni texte, ni img/figure/media
+    cleanHtml = cleanHtml.replace(/<p>(?:\s|<br\s*\/?>|<strong>\s*<\/strong>|<em>\s*<\/em>)*<\/p>/g, '');
+
+    // Texte plat pour l'IA et la recherche
+    const plainText = $article.text().replace(/\s{3,}/g,'\n\n').trim().substring(0,10000);
+
+    if (!title && !cleanHtml.trim()) return null;
+
+    const ym = plainText.match(/\b(200[4-9]|201[0-9]|202[0-5])\b/);
     return {
-      id, title: title || `Article AFTh #${id}`, url: res.url,
+      id,
+      title: title || `Article AFTh #${id}`,
+      url: res.url,
       theme: detectTheme(title||'', res.url),
       year: ym ? parseInt(ym[1]) : null,
-      content,
-      excerpt: content.substring(0,400).replace(/\n/g,' ').trim()+'…'
+      content: plainText,
+      content_html: cleanHtml.trim(),
+      excerpt: plainText.substring(0,400).replace(/\n/g,' ').trim()+'…',
+      imageCount: imgCount
     };
   } catch(e) { process.stdout.write(` ✗ ${e.message.substring(0,50)}\n`); return null; }
 }
 
 async function main() {
-  console.log('🔍 Scraping articles AFTh...\n');
+  console.log('🔍 Scraping articles AFTh (v2 avec HTML + images)...\n');
   mkdirSync('data', {recursive:true});
+  mkdirSync(IMG_DIR, {recursive:true});
   const articles = [];
-  let failed = 0;
+  let failed = 0, totalImages = 0;
   for (const id of IDS) {
     process.stdout.write(`  [${id}] `);
     const art = await scrape(id);
-    if (art) { articles.push(art); console.log(`✓ ${art.title.substring(0,55)}`); }
-    else failed++;
+    if (art) {
+      articles.push(art);
+      totalImages += art.imageCount || 0;
+      const imgInfo = art.imageCount ? ` [${art.imageCount} img]` : '';
+      console.log(`✓ ${art.title.substring(0,50)}${imgInfo}`);
+    } else {
+      failed++;
+    }
     await sleep(DELAY);
   }
+
+  // Preserve pdfFile et pdfSourceUrl des articles existants (ajoutés par fetch-article-pdfs.js)
+  let existing = [];
+  try { existing = JSON.parse(await import('fs').then(f => f.readFileSync('data/articles.json','utf8'))); } catch {}
+  const pdfMap = new Map(existing.filter(a => a.pdfFile).map(a => [a.id, { pdfFile: a.pdfFile, pdfSourceUrl: a.pdfSourceUrl }]));
+  articles.forEach(a => {
+    const pdf = pdfMap.get(a.id);
+    if (pdf) { a.pdfFile = pdf.pdfFile; if (pdf.pdfSourceUrl) a.pdfSourceUrl = pdf.pdfSourceUrl; }
+  });
 
   const bulletins = [
     {year:2025,file:'bulletin-2025.pdf',theme:'Gestion de la radioactivité dans les établissements thermaux'},
@@ -113,8 +273,8 @@ async function main() {
 
   writeFileSync('data/articles.json', JSON.stringify(articles, null, 2));
   writeFileSync('data/bulletins-index.json', JSON.stringify(bulletins, null, 2));
-  console.log(`\n✅ ${articles.length} articles indexés (${failed} échecs)`);
-  console.log('→ data/articles.json & data/bulletins-index.json créés');
+  console.log(`\n✅ ${articles.length} articles indexés (${failed} échecs, ${totalImages} images téléchargées)`);
+  console.log('→ data/articles.json & data/bulletins-index.json mis à jour');
 }
 
 main().catch(console.error);

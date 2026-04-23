@@ -64,7 +64,14 @@
       "Bash(grep -nE \"^[^/]*@.*\\\\..*|/\\\\\\\\^\\\\[\\\\\\\\^\\\\\\\\\\\\\\\\s@\\\\\\\\]\" server.js)",
       "Bash(sed -n '660,680p' server.js)",
       "Bash(sed -n '663,672p' server.js)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(taskkill //F //IM node.exe node scripts/scrape-articles.js)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} - %{size_download} octets\\\\n\" http://localhost:3000/assets/images/articles/article-39-1.jpg)",
+      "Bash(awk '{print $5}')",
+      "Bash(awk ' *)",
+      "Read(//c/Users/tempo/AppData/Local/Temp/claude/C--AFTh/2de752e7-b0f5-4bd5-9ea2-63a63f15ac43/tasks/**)",
+      "Bash(taskkill //F //IM node.exe rm -f assets/images/articles/* node scripts/scrape-articles.js)",
+      "Bash(git -c user.email=wbambano@gmail.com -c user.name=wbambano-code commit -m ' *e pens)"
     ]
   }
 }
