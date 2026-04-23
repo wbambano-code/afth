@@ -145,6 +145,10 @@ Hébergement recommandé : **VPS OVH FR** (~7 €/mois, RGPD, disque persistant)
 
 Stack de mise en prod prévue : Caddy (reverse proxy + SSL auto) + pm2 (process manager) + cron hebdomadaire de backup chiffré vers OVH Object Storage.
 
+## 🔒 Sécurité
+
+Audit complet du projet : [`audit.md`](./audit.md) — classé par gravité (4 haut, 6 moyen, 7 faible, 7 info) avec scénarios d'attaque et remédiations chiffrées. ~1 jour de quick-wins avant mise en ligne publique.
+
 ## 📝 Features différées (memory)
 
 - **Actualités en pages individuelles** + archive `/actualites` (~2 h)
