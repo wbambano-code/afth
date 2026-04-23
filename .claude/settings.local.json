@@ -73,7 +73,10 @@
       "Bash(taskkill //F //IM node.exe rm -f assets/images/articles/* node scripts/scrape-articles.js)",
       "Bash(git -c user.email=wbambano@gmail.com -c user.name=wbambano-code commit -m ' *e pens)",
       "Bash(git merge *)",
-      "Bash(git -c user.email=\"wbambano@gmail.com\" -c user.name=\"wbambano-code\" commit -m \"chore: settings.local.json update\")"
+      "Bash(git -c user.email=\"wbambano@gmail.com\" -c user.name=\"wbambano-code\" commit -m \"chore: settings.local.json update\")",
+      "Bash(curl -s -b /tmp/cj.txt -X POST http://localhost:3000/admin/api/upload-image -H 'Content-Type: image/jpeg' --data-binary @assets/images/InstallThermale.jpg)",
+      "Bash(curl -s -b /tmp/cj.txt -X POST http://localhost:3000/admin/api/upload-image -H 'Content-Type: image/jpeg' --data-binary @-)",
+      "Bash(curl -s -b /tmp/cj.txt -X PUT http://localhost:3000/admin/api/actualites -H 'Content-Type: application/json' -d '{\"main\":{\"label\":\"Test\",\"title\":\"Test\",\"image\":\"\",\"body_html\":\"<p>Texte<script>alert\\(1\\)</script><strong>OK</strong></p><iframe src=\\\\\"x\\\\\"></iframe>\",\"cta_text\":\"\",\"cta_href\":\"\"},\"sidebar\":[]}')"
     ]
   }
 }

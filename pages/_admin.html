@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
+  <!-- Quill (éditeur WYSIWYG pour les champs riches) -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.min.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
   <style>
     body{background:var(--c-bg-alt)}
@@ -67,6 +70,13 @@
       .admin-main{padding:1rem}
       .row,.row-3{grid-template-columns:1fr}
     }
+    /* Quill : adaptation au design AFTh */
+    .ql-toolbar.ql-snow{border-color:var(--c-border);border-radius:var(--rad) var(--rad) 0 0;background:var(--c-bg-alt)}
+    .ql-container.ql-snow{border-color:var(--c-border);border-radius:0 0 var(--rad) var(--rad);font-family:var(--font-b);font-size:.92rem;min-height:120px;background:#fff}
+    .ql-editor{min-height:120px;line-height:1.7}
+    .ql-editor img{max-width:100%;height:auto;border-radius:6px;margin:.5rem 0}
+    .ql-editor.ql-blank::before{font-style:normal;color:var(--c-text-lt);font-size:.88rem}
+    .quill-wrapper{margin-bottom:.4rem}
   </style>
 </head>
 <body>
@@ -125,7 +135,7 @@
         <div class="field"><label>Label</label><input id="a-main-label" placeholder="Prix d'Honneur · 2025"></div>
         <div class="field"><label>Titre</label><input id="a-main-title"></div>
         <div class="field"><label>Image (chemin, ex : /assets/images/beraud.jpg)</label><input id="a-main-image"></div>
-        <div class="field"><label>Contenu (HTML autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;)</label><textarea id="a-main-body" rows="7"></textarea></div>
+        <div class="field"><label>Contenu (mise en forme + insertion d'images)</label><div id="a-main-body" class="quill-wrapper"></div></div>
         <div class="row">
           <div class="field"><label>Texte bouton (vide pour masquer)</label><input id="a-main-cta-text" placeholder="Voir le Prix complet →"></div>
           <div class="field"><label>Lien bouton</label><input id="a-main-cta-href" placeholder="/prix"></div>
@@ -193,8 +203,8 @@
           <button type="button" class="mini-btn" onclick="addTarif()">+ Ajouter un tarif</button>
         </div>
         <div class="field">
-          <label>Informations de paiement / adresse d'envoi (HTML autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;br&gt;)</label>
-          <textarea id="ad-payment" rows="6" placeholder="Pour entériner votre adhésion, pensez à envoyer le règlement à : ..."></textarea>
+          <label>Informations de paiement / adresse d'envoi</label>
+          <div id="ad-payment" class="quill-wrapper"></div>
         </div>
         <div class="row">
           <div class="field"><label>Texte du bouton (vide = masqué)</label><input id="ad-cta-text" placeholder="Demander l'adhésion →"></div>
@@ -345,7 +355,7 @@
         <button type="button" class="mini-btn danger" style="margin-left:.5rem;" onclick="removeArticlePdf()">Retirer le PDF</button>
       </div>
     </div>
-    <div class="field"><label>Contenu texte (utilisé si pas de PDF)</label><textarea id="dlg-art-content" rows="8"></textarea></div>
+    <div class="field"><label>Contenu (mise en forme + insertion d'images, utilisé si pas de PDF)</label><div id="dlg-art-content" class="quill-wrapper" style="min-height:240px;"></div></div>
     <div class="actions"><button class="btn btn-blue btn-sm" onclick="saveArticle()">💾 Enregistrer</button>
       <button class="btn btn-ghost btn-sm" onclick="closeDlg('dlg-art')">Annuler</button></div>
   </div>
@@ -362,6 +372,58 @@ function toast(msg, type='ok') {
   t.textContent = msg;
   t.className = 'toast show ' + type;
   setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== QUILL : éditeur WYSIWYG =====
+const QUILL_TOOLBAR = [
+  ['bold', 'italic', 'underline'],
+  [{ header: [2, 3, false] }],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['blockquote', 'link', 'image'],
+  ['clean']
+];
+function mountQuill(targetSelector, initialHtml, onChange) {
+  const target = typeof targetSelector === 'string' ? $(targetSelector) : targetSelector;
+  if (!target) return null;
+  const editor = document.createElement('div');
+  target.innerHTML = '';
+  target.appendChild(editor);
+  const quill = new Quill(editor, {
+    theme: 'snow',
+    placeholder: 'Saisissez votre contenu…',
+    modules: { toolbar: { container: QUILL_TOOLBAR } }
+  });
+  if (initialHtml) quill.clipboard.dangerouslyPasteHTML(0, initialHtml, 'silent');
+  quill.on('text-change', () => onChange && onChange(quill.root.innerHTML));
+  // Custom image upload handler
+  quill.getModule('toolbar').addHandler('image', () => uploadImageToQuill(quill));
+  return quill;
+}
+async function uploadImageToQuill(quill) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp,image/gif';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return toast('Image > 5 Mo refusée', 'err');
+    toast('📤 Upload en cours…');
+    try {
+      const buf = await file.arrayBuffer();
+      const res = await fetch('/admin/api/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: buf
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload échoué');
+      const range = quill.getSelection(true) || { index: quill.getLength() };
+      quill.insertEmbed(range.index, 'image', data.url, 'user');
+      quill.setSelection(range.index + 1);
+      toast('✓ Image insérée');
+    } catch (e) { toast('✗ ' + e.message, 'err'); }
+  };
+  input.click();
 }
 
 async function api(path, opt={}) {
@@ -404,13 +466,15 @@ async function load(view) {
 
 // ===== ADHÉSION =====
 let adData = { title:'Adhésion', tarifs:[], payment_info_html:'', cta_text:'', cta_href:'/contact' };
+let adPaymentQuill = null;
 async function loadAdhesion() {
   adData = await api('/admin/api/adhesion');
   adData.tarifs = adData.tarifs || [];
   $('#ad-title').value = adData.title || '';
-  $('#ad-payment').value = adData.payment_info_html || '';
   $('#ad-cta-text').value = adData.cta_text || '';
   $('#ad-cta-href').value = adData.cta_href || '';
+  adPaymentQuill = mountQuill('#ad-payment', adData.payment_info_html || '',
+    html => adData.payment_info_html = html);
   renderTarifs();
 }
 function renderTarifs() {
@@ -427,7 +491,7 @@ function addTarif() { adData.tarifs.push({ label:'', price:'' }); renderTarifs()
 function rmTarif(i) { adData.tarifs.splice(i, 1); renderTarifs(); }
 async function saveAdhesion() {
   adData.title = $('#ad-title').value;
-  adData.payment_info_html = $('#ad-payment').value;
+  adData.payment_info_html = adPaymentQuill ? adPaymentQuill.root.innerHTML : (adData.payment_info_html || '');
   adData.cta_text = $('#ad-cta-text').value;
   adData.cta_href = $('#ad-cta-href').value;
   try { await api('/admin/api/adhesion', { method: 'PUT', body: JSON.stringify(adData) }); toast('✓ Adhésion enregistrée'); }
@@ -455,8 +519,10 @@ function renderPrix() {
         </select></div>
       </div>
       <div class="field"><label>Titre</label><input value="${esc(p.title||'')}" oninput="pxData[${i}].title=this.value"></div>
-      <div class="field"><label>Texte (HTML léger autorisé : &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;)</label><textarea rows="5" oninput="pxData[${i}].body_html=this.value">${esc(p.body_html||'')}</textarea></div>`;
+      <div class="field"><label>Texte (mise en forme + insertion d'images)</label><div class="quill-wrapper" data-px-idx="${i}"></div></div>`;
     wrap.appendChild(d);
+    const ed = d.querySelector('.quill-wrapper');
+    mountQuill(ed, p.body_html || '', html => pxData[i].body_html = html);
   });
 }
 function addPrix() {
@@ -682,6 +748,7 @@ async function saveHero() {
 
 // ===== ACTUS =====
 let actusData = { main: {}, sidebar: [] };
+let actusMainQuill = null;
 async function loadActus() {
   actusData = await api('/admin/api/actualites');
   actusData.main = actusData.main || {};
@@ -689,9 +756,11 @@ async function loadActus() {
   $('#a-main-label').value = actusData.main.label || '';
   $('#a-main-title').value = actusData.main.title || '';
   $('#a-main-image').value = actusData.main.image || '';
-  $('#a-main-body').value = actusData.main.body_html || '';
   $('#a-main-cta-text').value = actusData.main.cta_text || '';
   $('#a-main-cta-href').value = actusData.main.cta_href || '';
+  // Mount Quill sur le contenu de l'actu principale
+  actusMainQuill = mountQuill('#a-main-body', actusData.main.body_html || '',
+    html => actusData.main.body_html = html);
   renderSide();
 }
 function renderSide() {
@@ -701,7 +770,7 @@ function renderSide() {
     d.innerHTML = `<button class="rm" onclick="rmSide(${i})">✕</button>
       <div class="row"><div class="field"><label>Label</label><input value="${esc(s.label||'')}" oninput="actusData.sidebar[${i}].label=this.value"></div>
       <div class="field"><label>Titre</label><input value="${esc(s.title||'')}" oninput="actusData.sidebar[${i}].title=this.value"></div></div>
-      <div class="field"><label>Texte (HTML léger)</label><textarea rows="3" oninput="actusData.sidebar[${i}].body_html=this.value">${esc(s.body_html||'')}</textarea></div>
+      <div class="field"><label>Texte (mise en forme + insertion d'images)</label><div class="quill-wrapper" data-side-idx="${i}"></div></div>
       <div class="row-3"><div class="field"><label>Texte bouton</label><input value="${esc(s.cta_text||'')}" oninput="actusData.sidebar[${i}].cta_text=this.value"></div>
       <div class="field"><label>Lien (# pour chat IA)</label><input value="${esc(s.cta_href||'')}" oninput="actusData.sidebar[${i}].cta_href=this.value"></div>
       <div class="field"><label>Style</label><select onchange="actusData.sidebar[${i}].cta_style=this.value">
@@ -711,15 +780,21 @@ function renderSide() {
         <option value="btn-primary"${s.cta_style==='btn-primary'?' selected':''}>Accent</option>
       </select></div></div>`;
     wrap.appendChild(d);
+    // Mount Quill sur le placeholder
+    const ed = d.querySelector('.quill-wrapper');
+    mountQuill(ed, s.body_html || '', html => actusData.sidebar[i].body_html = html);
   });
 }
 function addSideItem() { actusData.sidebar.push({ label:'', title:'', body_html:'', cta_text:'', cta_href:'', cta_style:'btn-blue' }); renderSide(); }
 function rmSide(i) { actusData.sidebar.splice(i, 1); renderSide(); }
 async function saveActus() {
   actusData.main = {
-    label: $('#a-main-label').value, title: $('#a-main-title').value,
-    image: $('#a-main-image').value, body_html: $('#a-main-body').value,
-    cta_text: $('#a-main-cta-text').value, cta_href: $('#a-main-cta-href').value
+    label: $('#a-main-label').value,
+    title: $('#a-main-title').value,
+    image: $('#a-main-image').value,
+    body_html: actusMainQuill ? actusMainQuill.root.innerHTML : (actusData.main.body_html || ''),
+    cta_text: $('#a-main-cta-text').value,
+    cta_href: $('#a-main-cta-href').value
   };
   try { await api('/admin/api/actualites', { method: 'PUT', body: JSON.stringify(actusData) }); toast('✓ Actualités enregistrées'); }
   catch (e) { toast('✗ ' + e.message, 'err'); }
@@ -838,13 +913,15 @@ function renderArt() {
 $('#art-search').addEventListener('input', e => { artFilter = e.target.value; renderArt(); });
 
 let artEditingId = null, artEditingPdf = null;
+let artContentQuill = null;
 function openAddArticle() {
   artEditingId = null; artEditingPdf = null;
   $('#dlg-art-title').textContent = 'Nouvel article';
   $('#dlg-art-title-in').value = ''; $('#dlg-art-theme').value = '';
-  $('#dlg-art-year').value = new Date().getFullYear(); $('#dlg-art-content').value = '';
+  $('#dlg-art-year').value = new Date().getFullYear();
   $('#dlg-art-pdf').value = '';
   $('#dlg-art-pdf-current').style.display = 'none';
+  artContentQuill = mountQuill('#dlg-art-content', '', () => {});
   $('#dlg-art').classList.add('show');
 }
 async function editArticle(id) {
@@ -855,8 +932,10 @@ async function editArticle(id) {
   $('#dlg-art-theme').value = a.theme || '';
   $('#dlg-art-year').value = a.year || '';
   $('#dlg-art-pdf').value = '';
-  const full = await api('/admin/api/articles').then(l => l.find(x => x.id === id));
-  $('#dlg-art-content').value = full?.excerpt || '';
+  // Récupère le contenu complet (content_html prioritaire, sinon content brut)
+  const full = await api('/admin/api/articles/' + id).catch(() => null);
+  const initialHtml = full?.content_html || (full?.content ? '<p>' + esc(full.content).replace(/\n/g,'<br>') + '</p>' : '');
+  artContentQuill = mountQuill('#dlg-art-content', initialHtml, () => {});
   const cur = $('#dlg-art-pdf-current');
   if (artEditingPdf) {
     cur.style.display = 'block';
@@ -886,11 +965,14 @@ async function removeArticlePdf() {
   } catch (e) { toast('✗ ' + e.message, 'err'); }
 }
 async function saveArticle() {
+  const html = artContentQuill ? artContentQuill.root.innerHTML : '';
+  // Quill produit "<p><br></p>" quand vide → considérer comme vide
+  const isEmpty = !html || html.replace(/<[^>]+>/g,'').trim() === '';
   const body = {
     title: $('#dlg-art-title-in').value,
     theme: $('#dlg-art-theme').value,
     year: $('#dlg-art-year').value || null,
-    content: $('#dlg-art-content').value
+    content_html: isEmpty ? '' : html
   };
   if (!body.title) return toast('Titre requis', 'err');
   const pdfFile = $('#dlg-art-pdf').files[0];

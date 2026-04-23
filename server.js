@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { readFileSync, writeFileSync, existsSync, unlinkSync, statSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, statSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { randomBytes, randomUUID } from 'crypto';
@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import nodemailer from 'nodemailer';
 import Database from 'better-sqlite3';
+import sanitizeHtml from 'sanitize-html';
 import Anthropic from '@anthropic-ai/sdk';
 import 'dotenv/config';
 
@@ -61,6 +62,30 @@ try { forumNewThreadTpl = readFileSync(join(__dirname, 'pages/_forum-new-thread.
 // === Helpers ===
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Sanitization du HTML produit par Quill avant stockage (XSS-safe)
+const RICH_TEXT_OPTS = {
+  allowedTags: ['p','br','h2','h3','h4','strong','b','em','i','u','s','ul','ol','li','blockquote','a','img'],
+  allowedAttributes: {
+    a: ['href','title','target','rel'],
+    img: ['src','alt','title'],
+    '*': ['class']
+  },
+  allowedSchemes: ['http','https','mailto'],
+  transformTags: {
+    a: (t,a) => ({ tagName:'a', attribs:{...a, target:'_blank', rel:'noopener noreferrer'} })
+  }
+};
+function sanitizeRich(html) {
+  if (!html || typeof html !== 'string') return '';
+  return sanitizeHtml(html, RICH_TEXT_OPTS);
+}
+
+// Pour articles : extrait le texte brut depuis le HTML (utilisé pour search + IA)
+function htmlToPlainText(html) {
+  if (!html) return '';
+  return String(html).replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 const DIACRITICS = new RegExp('[̀-ͯ]', 'g');
 function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(DIACRITICS, ''); }
@@ -627,7 +652,7 @@ app.put('/admin/api/hero', requireAuth, (req, res) => {
 app.get('/admin/api/prix', requireAuth, (req, res) => res.json(prix));
 app.put('/admin/api/prix', requireAuth, (req, res) => {
   if (!Array.isArray(req.body)) return res.status(400).json({ error: 'tableau requis' });
-  prix = req.body;
+  prix = req.body.map(p => ({ ...p, body_html: sanitizeRich(p.body_html) }));
   saveJson('data/prix.json', prix);
   res.json({ ok: true });
 });
@@ -635,7 +660,9 @@ app.put('/admin/api/prix', requireAuth, (req, res) => {
 // --- Adhésion ---
 app.get('/admin/api/adhesion', requireAuth, (req, res) => res.json(adhesion));
 app.put('/admin/api/adhesion', requireAuth, (req, res) => {
-  adhesion = req.body || {};
+  const data = req.body || {};
+  if (data.payment_info_html) data.payment_info_html = sanitizeRich(data.payment_info_html);
+  adhesion = data;
   saveJson('data/adhesion.json', adhesion);
   res.json({ ok: true });
 });
@@ -643,7 +670,12 @@ app.put('/admin/api/adhesion', requireAuth, (req, res) => {
 // --- Actualités ---
 app.get('/admin/api/actualites', requireAuth, (req, res) => res.json(actualites));
 app.put('/admin/api/actualites', requireAuth, (req, res) => {
-  actualites = req.body;
+  const data = req.body || {};
+  if (data.main && data.main.body_html) data.main.body_html = sanitizeRich(data.main.body_html);
+  if (Array.isArray(data.sidebar)) {
+    data.sidebar.forEach(s => { if (s.body_html) s.body_html = sanitizeRich(s.body_html); });
+  }
+  actualites = data;
   saveJson('data/actualites.json', actualites);
   res.json({ ok: true });
 });
@@ -689,17 +721,26 @@ app.get('/admin/api/articles', requireAuth, (req, res) => {
   res.json(articles.map(({ id, title, theme, year, excerpt, pdfFile, url }) =>
     ({ id, title, theme, year, excerpt, pdfFile, url })));
 });
+app.get('/admin/api/articles/:id', requireAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  const a = articles.find(x => x.id === id);
+  if (!a) return res.status(404).json({ error: 'Article introuvable' });
+  res.json(a);
+});
 app.post('/admin/api/articles', requireAuth, (req, res) => {
-  const { title, theme, year, content } = req.body || {};
+  const { title, theme, year, content, content_html } = req.body || {};
   if (!title) return res.status(400).json({ error: 'title requis' });
   const id = Math.max(0, ...articles.map(a => a.id)) + 1;
+  const cleanHtml = content_html ? sanitizeRich(content_html) : '';
+  const plainText = cleanHtml ? htmlToPlainText(cleanHtml) : String(content || '');
   const article = {
     id,
     title: String(title),
     theme: theme || 'Technique thermale',
     year: year ? parseInt(year) : null,
-    content: String(content || ''),
-    excerpt: String(content || '').substring(0, 400).replace(/\n/g, ' ').trim() + '…',
+    content: plainText,
+    content_html: cleanHtml,
+    excerpt: plainText.substring(0, 400).replace(/\n/g, ' ').trim() + '…',
     url: `/article/${id}`,
   };
   articles.push(article);
@@ -711,11 +752,15 @@ app.put('/admin/api/articles/:id', requireAuth, (req, res) => {
   const idx = articles.findIndex(a => a.id === id);
   if (idx < 0) return res.status(404).json({ error: 'introuvable' });
   const a = articles[idx];
-  const { title, theme, year, content } = req.body || {};
+  const { title, theme, year, content, content_html } = req.body || {};
   if (title !== undefined) a.title = String(title);
   if (theme !== undefined) a.theme = String(theme);
   if (year !== undefined) a.year = year ? parseInt(year) : null;
-  if (content !== undefined) {
+  if (content_html !== undefined) {
+    a.content_html = sanitizeRich(content_html);
+    a.content = htmlToPlainText(a.content_html);
+    a.excerpt = a.content.substring(0, 400).replace(/\n/g, ' ').trim() + '…';
+  } else if (content !== undefined) {
     a.content = String(content);
     a.excerpt = a.content.substring(0, 400).replace(/\n/g, ' ').trim() + '…';
   }
@@ -749,6 +794,38 @@ app.post('/admin/api/articles/:id/pdf',
     articles[idx].pdfFile = file;
     saveJson('data/articles.json', articles);
     res.json({ ok: true, file, size: req.body.length });
+  }
+);
+
+// === Upload d'image générique (pour Quill / éditeur riche) ===
+app.post('/admin/api/upload-image',
+  requireAuth,
+  express.raw({
+    type: ['image/jpeg','image/png','image/webp','image/gif'],
+    limit: '5mb'
+  }),
+  (req, res) => {
+    const ct = (req.get('content-type') || '').toLowerCase();
+    if (!/^image\/(jpeg|png|webp|gif)/.test(ct)) {
+      return res.status(400).json({ error: 'Type d\'image non supporté (jpg, png, webp, gif uniquement)' });
+    }
+    if (!req.body || !req.body.length) return res.status(400).json({ error: 'Image vide' });
+    if (req.body.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Image trop lourde (max 5 Mo)' });
+    // Vérification "magic number" (le content-type est contrôlé par le client)
+    const b = req.body;
+    const isPng  = b.length > 8  && b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47;
+    const isJpg  = b.length > 3  && b[0]===0xFF && b[1]===0xD8 && b[2]===0xFF;
+    const isGif  = b.length > 6  && b[0]===0x47 && b[1]===0x49 && b[2]===0x46;
+    const isWebp = b.length > 12 && b.subarray(8, 12).toString('ascii') === 'WEBP';
+    if (!(isPng || isJpg || isGif || isWebp)) {
+      return res.status(400).json({ error: 'Fichier corrompu ou type incorrect' });
+    }
+    const ext = isPng ? '.png' : isJpg ? '.jpg' : isGif ? '.gif' : '.webp';
+    const filename = `upload-${randomUUID()}${ext}`;
+    const dir = join(__dirname, 'assets/images/uploads');
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, filename), b);
+    res.json({ url: '/assets/images/uploads/' + filename, size: b.length });
   }
 );
 

@@ -7,3 +7,6 @@ data/forum.db-journal
 data/forum.db-wal
 data/forum.db-shm
 adherents-test-2026.xlsx
+# Uploads admin (pas versionnés sauf .gitkeep)
+assets/images/uploads/*
+!assets/images/uploads/.gitkeep
