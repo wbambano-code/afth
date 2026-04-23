@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "scrape": "node scripts/scrape-articles.js",
-    "fetch-assets": "bash scripts/fetch-assets.sh"
+    "fetch-assets": "bash scripts/fetch-assets.sh",
+    "seed:members": "node scripts/seed-test-members.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

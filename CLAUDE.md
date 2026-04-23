@@ -96,11 +96,12 @@ npm start
 # → http://localhost:3000
 ```
 
-**Scripts utilitaires** (optionnels, les données sont déjà versionnées) :
+**Scripts utilitaires** :
 ```bash
-bash scripts/fetch-assets.sh       # si les PDFs sont manquants
-node scripts/scrape-articles.js    # ~2 min, régénère data/articles.json
-node scripts/fetch-article-pdfs.js # récupère les 78 PDFs d'articles
+npm run seed:members               # Crée les 3 membres de test (mdp test1234) — RECOMMANDÉ sur clone frais
+bash scripts/fetch-assets.sh       # Si les PDFs/images sont manquants (déjà versionnés normalement)
+node scripts/scrape-articles.js    # ~3 min, régénère data/articles.json + images extraites
+node scripts/fetch-article-pdfs.js # Récupère les 78 PDFs d'articles
 ```
 
 ## 🔐 Accès
