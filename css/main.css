@@ -47,7 +47,7 @@ h3{font-size:clamp(1.05rem,1.8vw,1.4rem)} p{margin-bottom:.9rem}
 .burger span{display:block;width:22px;height:2px;background:#fff;margin:5px 0;transition:var(--tr)}
 
 /* HERO */
-.hero{min-height:100vh;background:linear-gradient(160deg,rgba(6,19,30,.92) 0%,rgba(15,61,80,.82) 50%,rgba(26,95,122,.72) 100%),url('/assets/images/InstallThermale.jpg') center/cover no-repeat;display:flex;align-items:center;padding-top:var(--nav-h);position:relative;overflow:hidden}
+.hero{min-height:100vh;background:linear-gradient(160deg,rgba(6,19,30,.75) 0%,rgba(15,61,80,.63) 50%,rgba(26,95,122,.51) 100%),url('/assets/images/InstallThermale.jpg') center/cover no-repeat;display:flex;align-items:center;padding-top:var(--nav-h);position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:90px;background:linear-gradient(to top,var(--c-bg),transparent)}
 .hero-grid-bg{position:absolute;inset:0;opacity:.03;background-image:radial-gradient(circle at 2px 2px,var(--c-accent) 1px,transparent 0);background-size:30px 30px}
 .hero-inner{position:relative;z-index:2;max-width:var(--w);margin:0 auto;padding:3.5rem 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}

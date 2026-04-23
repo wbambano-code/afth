@@ -58,7 +58,13 @@
       "Bash(git push *)",
       "Bash(grep -E \"\\\\.env$|members\\\\.json|forum\\\\.db|adherents-test\")",
       "Bash(curl -s http://localhost:3000/)",
-      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} · %{size_download} octets\\\\n\" http://localhost:3000/assets/images/InstallThermale.jpg)"
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} · %{size_download} octets\\\\n\" http://localhost:3000/assets/images/InstallThermale.jpg)",
+      "Bash(npm audit *)",
+      "Bash(grep -nE \"prepare\\\\\\(.*\\\\$\\\\{|prepare\\\\\\(.*\\\\+\" server.js)",
+      "Bash(grep -nE \"^[^/]*@.*\\\\..*|/\\\\\\\\^\\\\[\\\\\\\\^\\\\\\\\\\\\\\\\s@\\\\\\\\]\" server.js)",
+      "Bash(sed -n '660,680p' server.js)",
+      "Bash(sed -n '663,672p' server.js)",
+      "Bash(git checkout *)"
     ]
   }
 }
