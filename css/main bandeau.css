@@ -50,11 +50,11 @@ h3{font-size:clamp(1.05rem,1.8vw,1.4rem)} p{margin-bottom:.9rem}
 .hero{min-height:100vh;background:url('/assets/images/hero-source.jpg') center/cover no-repeat;background-attachment:fixed;display:flex;align-items:center;padding-top:var(--nav-h);position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:90px;background:linear-gradient(to top,var(--c-bg),transparent)}
 .hero-grid-bg{position:absolute;inset:0;opacity:.03;background-image:radial-gradient(circle at 2px 2px,var(--c-accent) 1px,transparent 0);background-size:30px 30px}
-.hero-stack{position:relative;z-index:2;max-width:var(--w);margin:0 auto;padding:3.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.7rem;text-align:center}
-.hero-band{max-width:720px;background:linear-gradient(135deg,rgba(45,140,168,.80) 0%,rgba(26,95,122,.86) 100%);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.26);border-radius:var(--rad-lg);box-shadow:0 18px 55px rgba(3,12,20,.30);padding:2rem 2.4rem}
-.hero-band-inner{text-align:center}
-.hero-cta{justify-content:center}
-.hero-congres{position:absolute;right:1.6rem;top:calc(50% + var(--nav-h)/2);transform:translateY(-50%);width:300px;z-index:3}
+.hero-band{width:100%;position:relative;z-index:2;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.55);border-bottom:1px solid rgba(79,184,201,.35);box-shadow:0 12px 60px rgba(3,12,20,.22);padding:2.8rem 0}
+.hero-band-inner{max-width:var(--w);margin:0 auto;padding:0 1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center}
+.hero-band-inner .hero-desc{max-width:760px}
+.hero-band-inner .hero-cta{justify-content:center}
+.hero-congres{position:absolute;right:1.6rem;bottom:5.5rem;width:300px;z-index:3}
 .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(79,184,201,.1);border:1px solid rgba(79,184,201,.28);border-radius:50px;padding:.28rem .95rem;font-size:.7rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--c-accent);margin-bottom:1.4rem}
 .hero-badge::before{content:'●';font-size:.42rem;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
@@ -62,25 +62,23 @@ h3{font-size:clamp(1.05rem,1.8vw,1.4rem)} p{margin-bottom:.9rem}
 .hero-title span{color:var(--c-accent);display:block}
 .hero-desc{color:rgba(255,255,255,.82);margin-bottom:1.75rem;line-height:1.8}
 .hero-cta{display:flex;gap:.85rem;flex-wrap:wrap}
-.hero-card{background:rgba(255,255,255,.90);border:1px solid rgba(79,184,201,.55);border-radius:var(--rad-lg);padding:1.6rem;backdrop-filter:blur(12px);box-shadow:0 18px 50px rgba(3,12,20,.30)}
+.hero-card{background:rgba(255,255,255,.88);border:1px solid rgba(79,184,201,.55);border-radius:var(--rad-lg);padding:1.6rem;backdrop-filter:blur(12px);box-shadow:0 18px 50px rgba(3,12,20,.30)}
 .hero-card-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--c-warm);margin-bottom:.5rem}
 .hero-card-title{font-family:var(--font-h);font-size:1.15rem;color:#fff;margin-bottom:.6rem;line-height:1.35}
 .hero-card-loc{font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1.1rem}
 .hero-speaker{display:flex;gap:.7rem;padding:.5rem 0;border-top:1px solid rgba(255,255,255,.07);font-size:.78rem;color:rgba(255,255,255,.58)}
 .hero-speaker strong{color:#fff;font-weight:600}
-/* Hero bandeau & encart — style C (teal vif) : texte blanc */
-.hero-band .hero-title{color:#fff;text-shadow:0 2px 14px rgba(3,12,20,.4)}
-.hero-band .hero-title span{color:#cdeff6}
-.hero-band .hero-desc{color:rgba(255,255,255,.86);margin-bottom:0}
-/* Pastille + bouton outline posés directement sur l'image */
-.hero-stack > .hero-badge{margin-bottom:0;background:rgba(15,61,80,.55);border-color:rgba(255,255,255,.40);color:#fff;backdrop-filter:blur(6px);text-shadow:0 1px 6px rgba(3,12,20,.4)}
-.hero-stack .btn-outline{background:rgba(15,61,80,.42);border-color:rgba(255,255,255,.55);color:#fff;backdrop-filter:blur(4px)}
-.hero-stack .btn-outline:hover{background:rgba(15,61,80,.62);color:#fff}
-.hero-card .hero-card-label{color:#a8771c}
+/* Hero bandeau & encart — texte sombre sur fond clair */
+.hero-band .hero-title{color:var(--c-text);text-shadow:none}
+.hero-band .hero-title span{color:var(--c-primary-lt)}
+.hero-band .hero-desc{color:var(--c-text-lt)}
+.hero-band .hero-badge{background:rgba(26,95,122,.10);border-color:rgba(26,95,122,.32);color:var(--c-primary)}
+.hero-band .btn-outline{border-color:rgba(15,61,80,.38);color:var(--c-primary)}
+.hero-band .btn-outline:hover{background:rgba(15,61,80,.07);color:var(--c-primary-dk)}
 .hero-card .hero-card-title{color:var(--c-text)}
 .hero-card .hero-card-loc{color:var(--c-text-lt)}
+.hero-card .hero-card-label{color:#a8771c}
 .hero-card .hero-speaker{border-top-color:rgba(15,61,80,.12);color:var(--c-text-lt)}
-.hero-card .hero-speaker strong{color:var(--c-text)}
 .hero-card .hero-speaker strong{color:var(--c-text)}
 
 /* BOUTONS */
